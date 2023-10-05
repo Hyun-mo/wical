@@ -1,0 +1,17 @@
+##dependency
+/node_modules
+/yarn.lock
+yarn-debug.log*
+yarn-error.log*
+
+# production
+/build
+/dist
+/output
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
