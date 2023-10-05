@@ -1,0 +1,48 @@
+body {
+  background-color: #232323;
+  color: #e3e3e3;
+}
+a {
+  text-decoration: none;
+  color: #e3e3e3;
+}
+
+button {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+.btn_close {
+  width: 10px;
+  height: 20px;
+  position: relative;
+  text-indent: -9999px;
+}
+.btn_close:before,
+.btn_close:after {
+  content: "";
+  width: 10px;
+  height: 1px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 4px;
+  background: #e3e3e3;
+}
+.btn_close:before {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.btn_close:after {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.hidden_txt {
+  display: none;
+}
+
+.circle {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #e3e3e3;
+}
