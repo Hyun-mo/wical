@@ -12,6 +12,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "src", "preload.js"),
     },
+    titleBarStyle: "customButtonsOnHover",
     frame: false,
   });
 
