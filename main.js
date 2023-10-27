@@ -7,15 +7,17 @@ const filePath = path.join(dataPath, "config.json");
 
 function createWindow() {
   const win = new BrowserWindow({
+    transparent: true,
     width: 280,
     height: 500,
     webPreferences: {
-      preload: path.join(__dirname, "src", "preload.js"),
+      // preload: path.join(__dirname, "src", "preload.js"),
     },
     titleBarStyle: "customButtonsOnHover",
     frame: false,
   });
 
+  // win.webContents.openDevTools();
   win.loadFile(path.join(__dirname, "src", "pages", "main", "main.html"));
 }
 

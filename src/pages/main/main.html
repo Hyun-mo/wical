@@ -2,8 +2,10 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self';" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="../style.css" rel="stylesheet" type="text/css" />
+    <script defer="defer" src="./main.js"></script>
     <title>Wical</title>
   </head>
   <body>
@@ -11,10 +13,11 @@
     <div class="head-line">
       <span id="today">Today</span>
       <a href="../setting/setting.html">
-        <img src="../../../assest/gear.svg" style="width: 2rem" />
+        <img src="../../../assest/gear.svg" style="width: 20px" />
       </a>
     </div>
-    <div class="calendar"></div>
+    <div class="calendar" id="calendar"></div>
     <div class="division-line"></div>
+    <div class="next-schedule">next...</div>
   </body>
 </html>
