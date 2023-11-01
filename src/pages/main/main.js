@@ -1,9 +1,35 @@
 function init() {
   const today = new Date();
-  const Today = document.getElementById("today");
-  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  const Month = document.getElementById("month");
+  const lang = "ch";
+  const days = {
+    ko: ["일", "월", "화", "수", "목", "금", "토"],
+    en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    ch: ["日", "月", "火", "水", "木", "金", "土"],
+  };
+  const en_month = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "Octorber",
+    "November",
+    "December",
+  ];
+  if (lang === "ko") {
+    Month.innerText = `${today.getMonth() + 1}` + "월";
+  } else if (lang === "en") {
+    Month.innerText = en_month[today.getMonth()];
+  } else {
+    Month.innerText = `${today.getMonth() + 1}` + "月";
+  }
   const calendar = document.getElementById("calendar");
-  for (const day of days) {
+  for (const day of days[lang]) {
     const el = document.createElement("span");
     el.className = "day";
     el.innerText = day;
@@ -13,7 +39,7 @@ function init() {
   console.log(prev);
   for (const date of prev) {
     const el = document.createElement("span");
-    el.className = "date_prev date";
+    el.className = "date-prev date";
     el.innerText = date;
     calendar.appendChild(el);
   }
@@ -28,13 +54,12 @@ function init() {
   }
   for (const date of next) {
     const el = document.createElement("span");
-    el.className = "date_next date";
+    el.className = "date-next date";
     el.innerText = date;
     calendar.appendChild(el);
   }
 }
 
-init();
 function Board() {
   const now = new Date();
   const first = new Date(now.getFullYear(), now.getMonth());
@@ -58,3 +83,5 @@ function Board() {
   }
   return [prev || [], dates, next];
 }
+
+init();

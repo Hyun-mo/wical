@@ -3,7 +3,7 @@ html {
   background: rgba(0, 0, 0, 0);
 }
 body {
-  background-color: rgba(45, 45, 45, 0.2);
+  background-color: rgba(50, 50, 50, 0.3);
   color: #e3e3e3;
   font-size: 1.6rem;
   margin: 0;
@@ -32,17 +32,17 @@ button {
   /* -webkit-app-region: drag; */
 
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   padding-inline: 20px;
 }
-.btn_close {
+.btn-close {
   width: 10px;
   height: 20px;
   position: relative;
   text-indent: -9999px;
 }
-.btn_close:before,
-.btn_close:after {
+.btn-close:before,
+.btn-close:after {
   content: "";
   width: 10px;
   height: 1px;
@@ -52,13 +52,13 @@ button {
   border-radius: 4px;
   background: #e3e3e3;
 }
-.btn_close:before {
+.btn-close:before {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
-.btn_close:after {
+.btn-close:after {
   transform: translate(-50%, -50%) rotate(45deg);
 }
-.hidden_txt {
+.hidden-txt {
   display: none;
 }
 
@@ -96,15 +96,14 @@ button {
 
   /* border: 1px solid #e2e2e2; */
 }
-.calendar span:nth-child(7n + 1),
-.calendar span:nth-child(7n + 7) {
-  background-color: rgba(50, 50, 50, 0.5);
+.calendar span:nth-child(7n + 8),
+.calendar span:nth-child(7n + 14) {
+  background-color: rgba(75, 75, 75, 0.5);
 }
-.calendar span:nth-child(1),
-.calendar span:nth-child(7) {
+.calendar span:nth-child(8),
+.calendar span:nth-child(14) {
   border-top-right-radius: 10px;
   border-top-left-radius: 10px;
-  color: #626262;
 }
 .calendar span:nth-child(43),
 .calendar span:nth-child(49) {
@@ -126,13 +125,35 @@ button {
   justify-content: center;
 }
 
-.date_prev,
-.date_next {
-  color: #626262;
+.date-prev,
+.date-next {
+  color: #929292;
 }
 
-.today {
+.month {
   box-sizing: border-box;
   border-radius: 5px;
   border: 1.5px solid #e3e3e3;
+}
+
+.gear {
+  position: absolute;
+  right: 20px;
+}
+
+.arrow {
+  border: solid #e3e3e3;
+  border-width: 0 3px 3px 0;
+  height: 12px;
+  width: 12px;
+  border-radius: 3px;
+  padding: 3px;
+}
+
+.right {
+  transform: translate(0, 25%) rotate(-45deg);
+}
+
+.left {
+  transform: translate(0, 25%) rotate(135deg);
 }
