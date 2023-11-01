@@ -1,5 +1,34 @@
 function init() {
-  const today = new Date();
+  let now_month = 0;
+  const btn = document.getElementsByClassName("arrow");
+  for (const b of btn) {
+    b.addEventListener("click", (e) => {
+      if (b.classList.contains("left")) now_month -= 1;
+      if (b.classList.contains("right")) now_month += 1;
+      Board(now_month);
+    });
+  }
+
+  Board(0);
+  calendar.addEventListener("click", (e) => {
+    console.log(e.target.innerText);
+    if (e.target.classList.contains("date-prev")) {
+      now_month -= 1;
+      Board(now_month, Number(e.target.innerText));
+    } else if (e.target.classList.contains("date-next")) {
+      now_month += 1;
+      Board(now_month, Number(e.target.innerText));
+    } else if (e.target.classList.contains("date")) {
+      Board(now_month, Number(e.target.innerText));
+    }
+  });
+}
+
+function Board(n, selected) {
+  console.log(n, selected);
+  const this_month = new Date();
+  this_month.setDate(1);
+  this_month.setMonth(this_month.getMonth() + n);
   const Month = document.getElementById("month");
   const lang = "ch";
   const days = {
@@ -22,48 +51,23 @@ function init() {
     "December",
   ];
   if (lang === "ko") {
-    Month.innerText = `${today.getMonth() + 1}` + "월";
+    Month.innerText = `${this_month.getMonth() + 1}` + "월";
   } else if (lang === "en") {
-    Month.innerText = en_month[today.getMonth()];
+    Month.innerText = en_month[this_month.getMonth()];
   } else {
-    Month.innerText = `${today.getMonth() + 1}` + "月";
+    Month.innerText = `${this_month.getMonth() + 1}` + "月";
   }
   const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
   for (const day of days[lang]) {
     const el = document.createElement("span");
     el.className = "day";
     el.innerText = day;
     calendar.appendChild(el);
   }
-  const [prev, dates, next] = Board();
-  console.log(prev);
-  for (const date of prev) {
-    const el = document.createElement("span");
-    el.className = "date-prev date";
-    el.innerText = date;
-    calendar.appendChild(el);
-  }
-  for (const date of dates) {
-    const el = document.createElement("span");
-    el.className = "date";
-    console.log(date);
-    console.log(today.getDate());
-    if (date === today.getDate()) el.className += " today";
-    el.innerText = date;
-    calendar.appendChild(el);
-  }
-  for (const date of next) {
-    const el = document.createElement("span");
-    el.className = "date-next date";
-    el.innerText = date;
-    calendar.appendChild(el);
-  }
-}
-
-function Board() {
   const now = new Date();
-  const first = new Date(now.getFullYear(), now.getMonth());
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const first = new Date(this_month.getFullYear(), this_month.getMonth());
+  const end = new Date(this_month.getFullYear(), this_month.getMonth() + 1, 0);
   let prev = [];
   let dates = [];
   let next = [];
@@ -81,7 +85,27 @@ function Board() {
   for (let i = 0; next.length < next_days; i++) {
     next.push(i + 1);
   }
-  return [prev || [], dates, next];
+
+  for (const date of prev) {
+    const el = document.createElement("span");
+    el.className = "date-prev date";
+    el.innerText = date;
+    calendar.appendChild(el);
+  }
+  for (const date of dates) {
+    const el = document.createElement("span");
+    el.className = "date";
+    if (n === 0 && date === now.getDate()) el.className += " today";
+    if (date === selected) el.className += " selected";
+    el.innerText = date;
+    calendar.appendChild(el);
+  }
+  for (const date of next) {
+    const el = document.createElement("span");
+    el.className = "date-next date";
+    el.innerText = date;
+    calendar.appendChild(el);
+  }
 }
 
 init();
