@@ -95,8 +95,8 @@ function Board(n, selected) {
   for (const date of dates) {
     const el = document.createElement("span");
     el.className = "date";
-    if (n === 0 && date === now.getDate()) el.className += " today";
-    if (date === selected) el.className += " selected";
+    if (date === selected) el.className = "date selected";
+    if (n === 0 && date === now.getDate()) el.className = "date today";
     el.innerText = date;
     calendar.appendChild(el);
   }
