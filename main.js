@@ -1,23 +1,27 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const fs = require("fs");
 const path = require("path");
 
 const dataPath = app.getPath("userData");
 const filePath = path.join(dataPath, "config.json");
-
-function createWindow() {
+const isDev = process.env.NODE_ENV === "development";
+parseData();
+async function createWindow() {
+  const config = readData("config");
   const win = new BrowserWindow({
     transparent: true,
-    width: 280,
-    height: 340,
+    width: isDev ? 900 : 280,
+    height: config.onlyCalc ? 380 : 500,
     webPreferences: {
       // preload: path.join(__dirname, "src", "preload.js"),
+      contextIsolation: false,
+      nodeIntegration: true,
     },
     titleBarStyle: "customButtonsOnHover",
     frame: false,
   });
 
-  // win.webContents.openDevTools();
+  if (isDev) win.webContents.openDevTools();
   win.loadFile(path.join(__dirname, "src", "pages", "main", "main.html"));
 }
 
@@ -49,10 +53,24 @@ function readData(key) {
 }
 
 function parseData() {
-  const defaultData = {};
+  const defaultData = {
+    config: {
+      startingApp: false,
+      onlyCalc: true,
+      resizable: true,
+    },
+  };
   try {
     return JSON.parse(fs.readFileSync(filePath));
   } catch (error) {
+    if (!fs.existsSync(filePath))
+      fs.writeFileSync(filePath, JSON.stringify(defaultData));
     return defaultData;
   }
 }
+
+ipcMain.handle("use-local-storage", (_, data) => {
+  console.log(data["key"]);
+  if ("value" in data) return writeData(data["key"], data["value"]);
+  return readData(data["key"]);
+});

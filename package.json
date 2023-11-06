@@ -15,11 +15,12 @@
     "electron": "^26.3.0"
   },
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
+    "start": "cross-env NODE_ENV=development electron-forge start",
+    "package": "cross-env NODE_ENV=production electron-forge package",
+    "make": "cross-env NODE_ENV=production electron-forge make"
   },
   "dependencies": {
+    "cross-env": "^7.0.3",
     "electron-squirrel-startup": "^1.0.0"
   }
 }
