@@ -1,17 +1,14 @@
 function init() {
   let now_month = 0;
-  const btn = document.getElementsByClassName("arrow");
-  for (const b of btn) {
-    b.addEventListener("click", (e) => {
-      if (b.classList.contains("left")) now_month -= 1;
-      if (b.classList.contains("right")) now_month += 1;
-      Board(now_month);
-    });
-  }
+  const arrow = document.getElementsByClassName("head-line")[0];
+  arrow.addEventListener("click", (e) => {
+    if (e.target.classList.contains("left")) now_month -= 1;
+    if (e.target.classList.contains("right")) now_month += 1;
+    Board(now_month);
+  });
 
   Board(0);
   calendar.addEventListener("click", (e) => {
-    console.log(e.target.innerText);
     if (e.target.classList.contains("date-prev")) {
       now_month -= 1;
       Board(now_month, Number(e.target.innerText));
@@ -25,12 +22,11 @@ function init() {
 }
 
 function Board(n, selected) {
-  console.log(n, selected);
   const this_month = new Date();
   this_month.setDate(1);
   this_month.setMonth(this_month.getMonth() + n);
   const Month = document.getElementById("month");
-  const lang = "ch";
+  const lang = "en";
   const days = {
     ko: ["일", "월", "화", "수", "목", "금", "토"],
     en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
@@ -53,6 +49,7 @@ function Board(n, selected) {
   if (lang === "ko") {
     Month.innerText = `${this_month.getMonth() + 1}` + "월";
   } else if (lang === "en") {
+    Month.style.width = "11rem";
     Month.innerText = en_month[this_month.getMonth()];
   } else {
     Month.innerText = `${this_month.getMonth() + 1}` + "月";

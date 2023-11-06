@@ -30,11 +30,18 @@ button {
 }
 .head-line {
   /* -webkit-app-region: drag; */
-
+  font-size: 2.4rem;
   display: flex;
   justify-content: center;
   padding-inline: 20px;
 }
+
+#month {
+  width: 5rem;
+  display: flex;
+  justify-content: center;
+}
+
 .btn-close {
   width: 10px;
   height: 20px;
@@ -151,10 +158,9 @@ button {
 .arrow {
   border: solid #e3e3e3;
   border-width: 0 3px 3px 0;
-  height: 12px;
-  width: 12px;
-  border-radius: 3px;
-  padding: 3px;
+  height: 1.6rem;
+  width: 1.6rem;
+  border-radius: 2px;
 }
 
 .right {
@@ -163,4 +169,8 @@ button {
 
 .left {
   transform: translate(0, 25%) rotate(135deg);
+}
+
+.next-schedule {
+  display: none;
 }
