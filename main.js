@@ -10,8 +10,8 @@ async function createWindow() {
   const config = readData("config");
   const win = new BrowserWindow({
     transparent: true,
-    width: isDev ? 900 : 280,
-    height: config.onlyCalc ? 380 : 500,
+    width: isDev ? 900 : 240,
+    height: config.onlyCalc ? 300 : 500,
     webPreferences: {
       // preload: path.join(__dirname, "src", "preload.js"),
       contextIsolation: false,
