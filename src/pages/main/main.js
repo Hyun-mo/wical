@@ -16,7 +16,15 @@ function init() {
       now_month += 1;
       Board(now_month, Number(e.target.innerText));
     } else if (e.target.classList.contains("date")) {
-      Board(now_month, Number(e.target.innerText));
+      if (e.target.classList.contains("selected")) {
+        e.target.classList.remove("selected");
+      } else {
+        for (const el of Array.from(calendar.children)) {
+          if (el.classList.contains("selected"))
+            el.classList.remove("selected");
+        }
+        e.target.classList.add("selected");
+      }
     }
   });
 }
@@ -92,9 +100,20 @@ function Board(n, selected) {
   for (const date of dates) {
     const el = document.createElement("span");
     el.className = "date";
-    if (date === selected) el.className = "date selected";
-    if (n === 0 && date === now.getDate()) el.className = "date today";
     el.innerText = date;
+    const dot = document.createElement("span");
+    const dot2 = document.createElement("span");
+    const dot_box = document.createElement("div");
+    dot_box.className = "dot-box";
+
+    dot.className = "dot";
+    dot2.className = "dot";
+    dot_box.appendChild(dot);
+    dot_box.appendChild(dot2);
+    el.appendChild(dot_box);
+    if (n === 0 && date === now.getDate()) {
+      el.className = "date today";
+    }
     calendar.appendChild(el);
   }
   for (const date of next) {
