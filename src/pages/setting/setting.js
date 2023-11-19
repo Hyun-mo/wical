@@ -7,6 +7,9 @@ function init() {
     console.log(result);
     console.log("renderer, handle");
   });
+  IpcRenderer.invoke("google-login", "render").then((result) => {
+    console.log(result);
+  });
 }
 
 init();

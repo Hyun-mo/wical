@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const fs = require("fs");
 const path = require("path");
-
+const google = require("./src/api/google");
 const dataPath = app.getPath("userData");
 const filePath = path.join(dataPath, "config.json");
 const isDev = process.env.NODE_ENV === "development";
@@ -73,4 +73,9 @@ ipcMain.handle("use-local-storage", (_, data) => {
   console.log(data["key"]);
   if ("value" in data) return writeData(data["key"], data["value"]);
   return readData(data["key"]);
+});
+
+ipcMain.handle("google-login", (_, data) => {
+  console.log(data);
+  return google.authorize().then(google.getAllEvents);
 });

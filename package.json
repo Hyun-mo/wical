@@ -20,7 +20,9 @@
     "make": "cross-env NODE_ENV=production electron-forge make"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "2.1.0",
     "cross-env": "^7.0.3",
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "googleapis": "105"
   }
 }
