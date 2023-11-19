@@ -2,7 +2,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const { authenticate } = require("@google-cloud/local-auth");
 const { google } = require("googleapis");
-
+// https://developers.google.com/calendar/api/guides/overview?hl=ko
 // If modifying these scopes, delete token.json.
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 // The file token.json stores the user's access and refresh tokens, and is
@@ -67,12 +67,17 @@ async function authorize() {
 /**
  * Lists the next 10 events on the user's primary calendar.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ * @param {Date} start Date type
+ * @param {Date} end Date type.
  */
-async function listEvents(auth) {
+async function listEvents(auth, start, end) {
   const calendar = google.calendar({ version: "v3", auth });
+  console.log(start);
+  console.log(end);
   const res = await calendar.events.list({
     calendarId: "primary",
-    timeMin: new Date().toISOString(),
+    timeMin: start.toISOString(),
+    timeMax: end.toISOString(),
     maxResults: 10,
     singleEvents: true,
     orderBy: "startTime",
@@ -83,10 +88,11 @@ async function listEvents(auth) {
     return;
   }
   console.log("Upcoming 10 events:");
-  events.map((event, _) => {
+  events.map((event, i) => {
     const start = event.start.dateTime || event.start.date;
     console.log(`${start} - ${event.summary}`);
   });
+  return events;
 }
 
 async function getAllEvents(auth) {
@@ -117,15 +123,20 @@ async function getAllEvents(auth) {
       events[events.length - 1].start.dateTime;
   }
 
+  allEvents.map((event, i) => {
+    const start = event.start.dateTime || event.start.date;
+    console.log(`${start} - ${event.summary}`);
+  });
   return allEvents;
 }
 
 //get calendar id
 async function calendarList(auth) {
   const calendar = google.calendar({ version: "v3", auth });
-  return await calendar.calendarList.list();
+  const calendar_list = await calendar.calendarList.list();
+  console.log(calendar_list.data.items);
 }
 
 // authorize().then(calendarList).catch(console.error);
 
-module.exports = { authorize, calendarList, getAllEvents };
+module.exports = { authorize, calendarList, getAllEvents, listEvents };

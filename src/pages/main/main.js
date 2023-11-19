@@ -73,6 +73,7 @@ function Board(n, selected) {
   const now = new Date();
   const first = new Date(this_month.getFullYear(), this_month.getMonth());
   const end = new Date(this_month.getFullYear(), this_month.getMonth() + 1, 0);
+
   let prev = [];
   let dates = [];
   let next = [];
@@ -103,13 +104,16 @@ function Board(n, selected) {
     el.innerText = date;
     const dot = document.createElement("span");
     const dot2 = document.createElement("span");
+    const dot3 = document.createElement("span");
     const dot_box = document.createElement("div");
     dot_box.className = "dot-box";
 
     dot.className = "dot";
     dot2.className = "dot";
+    dot3.className = "dot";
     dot_box.appendChild(dot);
     dot_box.appendChild(dot2);
+    dot_box.appendChild(dot3);
     el.appendChild(dot_box);
     if (n === 0 && date === now.getDate()) {
       el.className = "date today";

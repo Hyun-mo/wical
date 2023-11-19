@@ -77,5 +77,10 @@ ipcMain.handle("use-local-storage", (_, data) => {
 
 ipcMain.handle("google-login", (_, data) => {
   console.log(data);
-  return google.authorize().then(google.getAllEvents);
+  return google.authorize();
+});
+
+ipcMain.handle("google-get-events", (_, { start, end }) => {
+  console.log(start, end);
+  return google.authorize().then((auth) => google.listEvents(auth, start, end));
 });
