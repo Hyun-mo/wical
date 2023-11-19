@@ -17,4 +17,4 @@ yarn-error.log*
 .env.production.local
 
 #secure
-/api/*.json
+/src/api/*.json
