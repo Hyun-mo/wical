@@ -1,7 +1,7 @@
 const fs = require("fs").promises;
 const path = require("path");
 const { authenticate } = require("@google-cloud/local-auth");
-const { google } = require("googleapis");
+const { google, calendar_v3 } = require("googleapis");
 // https://developers.google.com/calendar/api/guides/overview?hl=ko
 // If modifying these scopes, delete token.json.
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
@@ -69,6 +69,7 @@ async function authorize() {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  * @param {Date} start Date type
  * @param {Date} end Date type.
+ * @returns {calendar_v3.Schema$Event[]}
  */
 async function listEvents(auth, start, end) {
   const calendar = google.calendar({ version: "v3", auth });
@@ -95,14 +96,22 @@ async function listEvents(auth, start, end) {
   return events;
 }
 
-async function getAllEvents(auth) {
+/**
+ * Lists the next 10 events on the user's primary calendar.
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ * @param {Date} start Date type
+ * @param {Date} end Date type.
+ * @returns {calendar_v3.Schema$Event[]}
+ */
+async function getAllEvents(auth, start, end) {
   const calendar = google.calendar({ version: "v3", auth });
   const allEvents = [];
   let timeMin = new Date().toISOString();
   while (1) {
     const res = await calendar.events.list({
       calendarId: "primary",
-      timeMin: timeMin,
+      timeMin: start,
+      timeMax: end,
       //   maxResults: 30,
       singleEvents: true,
       orderBy: "startTime",
@@ -114,7 +123,7 @@ async function getAllEvents(auth) {
       timeMin === events[events.length - 1].start.date ||
       timeMin === events[events.length - 1].start.dateTime
     ) {
-      console.log("No upcoming events found.");
+      // console.log("No upcoming events found.");
       break;
     }
     allEvents.push(...events);

@@ -80,7 +80,34 @@ ipcMain.handle("google-login", (_, data) => {
   return google.authorize();
 });
 
-ipcMain.handle("google-get-events", (_, { start, end }) => {
+ipcMain.handle("google-get-calendar", (_, { start, end }) => {
   console.log(start, end);
-  return google.authorize().then((auth) => google.listEvents(auth, start, end));
+  return google
+    .authorize()
+    .then((auth) => google.getAllEvents(auth, start, end))
+    .then(event_to_hash);
 });
+
+/**
+ * Lists the next 10 events on the user's primary calendar.
+ * @param {calendar_v3.Schema$Event[]} events
+ * @returns {Object} hash object of calendar event
+ */
+function event_to_hash(events) {
+  const result = {};
+  events.forEach((v, i) => {
+    const start = new Date(v.start.date || v.start.dateTime).getTime();
+    const end = new Date(v.end.date || v.end.dateTime).getTime();
+    let day = 1000 * 60 * 60 * 24;
+    let t = 0;
+    while (start + t < end) {
+      if (Math.round((start + t) / day) in result)
+        result[Math.round((start + t) / day)].push(v);
+      else {
+        result[Math.round((start + t) / day)] = [v];
+      }
+      t += day;
+    }
+  });
+  return result;
+}

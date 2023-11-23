@@ -113,6 +113,7 @@ button {
 .calendar span:nth-child(7n + 8),
 .calendar span:nth-child(7n + 14) {
   background-color: rgba(75, 75, 75, 0.5);
+  z-index: -2;
 }
 .calendar span:nth-child(8),
 .calendar span:nth-child(14) {

@@ -1,40 +1,47 @@
+const IpcRenderer = require("electron").ipcRenderer;
+let events = {};
+const lang = "ko";
 function init() {
+  getGoogleCalendar(new Date());
   let now_month = 0;
   const arrow = document.getElementsByClassName("head-line")[0];
   arrow.addEventListener("click", (e) => {
     if (e.target.classList.contains("left")) now_month -= 1;
     if (e.target.classList.contains("right")) now_month += 1;
-    Board(now_month);
+    calRender(now_month, lang);
   });
+  calRender(0, lang);
 
-  Board(0);
-  calendar.addEventListener("click", (e) => {
+  document.getElementById("calendar").addEventListener("click", (e) => {
     if (e.target.classList.contains("date-prev")) {
       now_month -= 1;
-      Board(now_month, Number(e.target.innerText));
+      calRender(now_month, lang);
     } else if (e.target.classList.contains("date-next")) {
       now_month += 1;
-      Board(now_month, Number(e.target.innerText));
+      calRender(now_month, lang);
     } else if (e.target.classList.contains("date")) {
+      const prev = document.getElementsByClassName("selected");
       if (e.target.classList.contains("selected")) {
         e.target.classList.remove("selected");
       } else {
-        for (const el of Array.from(calendar.children)) {
-          if (el.classList.contains("selected"))
-            el.classList.remove("selected");
-        }
+        if (prev.length) prev[0].classList.remove("selected");
         e.target.classList.add("selected");
       }
     }
   });
+  IpcRenderer.invoke("use-local-storage", { key: "config" }).then((result) => {
+    console.log(result);
+    console.log("renderer, handle");
+  });
 }
 
-function Board(n, selected) {
-  const this_month = new Date();
-  this_month.setDate(1);
-  this_month.setMonth(this_month.getMonth() + n);
+function calRender(now_month, lang) {
+  const now = new Date();
+  const month = new Date();
+  month.setDate(1);
+  month.setMonth(month.getMonth() + now_month);
+  const this_month = month.getMonth();
   const Month = document.getElementById("month");
-  const lang = "en";
   const days = {
     ko: ["일", "월", "화", "수", "목", "금", "토"],
     en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
@@ -55,12 +62,12 @@ function Board(n, selected) {
     "December",
   ];
   if (lang === "ko") {
-    Month.innerText = `${this_month.getMonth() + 1}` + "월";
+    Month.innerText = `${month.getMonth() + 1}` + "월";
   } else if (lang === "en") {
     Month.style.width = "11rem";
-    Month.innerText = en_month[this_month.getMonth()];
+    Month.innerText = en_month[month.getMonth()];
   } else {
-    Month.innerText = `${this_month.getMonth() + 1}` + "月";
+    Month.innerText = `${month.getMonth() + 1}` + "月";
   }
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
@@ -70,62 +77,66 @@ function Board(n, selected) {
     el.innerText = day;
     calendar.appendChild(el);
   }
-  const now = new Date();
-  const first = new Date(this_month.getFullYear(), this_month.getMonth());
-  const end = new Date(this_month.getFullYear(), this_month.getMonth() + 1, 0);
 
-  let prev = [];
-  let dates = [];
-  let next = [];
-  if (first.getDay() !== 0) {
-    const last = new Date(first.getFullYear(), first.getMonth(), 0).getDate();
-    for (let i = first.getDay(); i > 0; i--) {
-      prev.push(last - i + 1);
+  const date = new Date(month.getFullYear(), month.getMonth(), -month.getDay());
+  const day = 1000 * 60 * 60 * 24;
+  console.log(date);
+  console.log(events);
+  for (let i = 0; i < 42; i++) {
+    date.setDate(date.getDate() + 1);
+    const mm = date.getMonth();
+    const el = document.createElement("span");
+    if (mm < this_month) {
+      el.className = "date-prev date";
+      el.innerText = date.getDate();
+      el.id = date;
+    } else if (mm === this_month) {
+      el.className = "date";
+      el.innerText = date.getDate();
+      el.id = date;
+
+      if (date === now.getDate() && now_month === 0) {
+        el.className = "date today";
+      }
+    } else {
+      el.className = "date-next date";
+      el.innerText = date.getDate();
+      el.id = date;
     }
-  }
-  for (let i = 0; i < end.getDate(); i++) {
-    dates.push(i + 1);
-  }
-
-  const next_days = 42 - dates.length - prev.length;
-  for (let i = 0; next.length < next_days; i++) {
-    next.push(i + 1);
-  }
-
-  for (const date of prev) {
-    const el = document.createElement("span");
-    el.className = "date-prev date";
-    el.innerText = date;
-    calendar.appendChild(el);
-  }
-  for (const date of dates) {
-    const el = document.createElement("span");
-    el.className = "date";
-    el.innerText = date;
-    const dot = document.createElement("span");
-    const dot2 = document.createElement("span");
-    const dot3 = document.createElement("span");
-    const dot_box = document.createElement("div");
-    dot_box.className = "dot-box";
-
-    dot.className = "dot";
-    dot2.className = "dot";
-    dot3.className = "dot";
-    dot_box.appendChild(dot);
-    dot_box.appendChild(dot2);
-    dot_box.appendChild(dot3);
-    el.appendChild(dot_box);
-    if (n === 0 && date === now.getDate()) {
-      el.className = "date today";
+    if (events[Math.round(date.getTime() / day)]) {
+      const e = events[Math.round(date.getTime() / day)];
+      console.log(date);
+      const dot_box = document.createElement("div");
+      dot_box.className = "dot-box";
+      for (asd of e) {
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        dot_box.appendChild(dot);
+        el.appendChild(dot_box);
+      }
     }
     calendar.appendChild(el);
   }
-  for (const date of next) {
-    const el = document.createElement("span");
-    el.className = "date-next date";
-    el.innerText = date;
-    calendar.appendChild(el);
-  }
+}
+
+/**
+ * get events of the year
+ * @param{Date} month Date type
+ */
+function getGoogleCalendar(month) {
+  const year = month.getFullYear();
+  if (year in events) return;
+  const start = new Date(month.getFullYear(), 0, 1);
+  const end = new Date(month.getFullYear() + 1, 0, 0);
+  console.log(start);
+  console.log(end);
+  IpcRenderer.invoke("google-get-calendar", {
+    start: start,
+    end: end,
+  }).then((result) => {
+    events = result;
+    calRender(0, lang);
+  });
 }
 
 init();
