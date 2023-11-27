@@ -84,7 +84,7 @@ ipcMain.handle("google-get-calendar", (_, { start, end }) => {
   console.log(start, end);
   return google
     .authorize()
-    .then((auth) => google.getAllEvents(auth, start, end))
+    .then((auth) => google.listEvents(auth, start, end))
     .then(event_to_hash);
 });
 
@@ -94,20 +94,24 @@ ipcMain.handle("google-get-calendar", (_, { start, end }) => {
  * @returns {Object} hash object of calendar event
  */
 function event_to_hash(events) {
-  const result = {};
-  events.forEach((v, i) => {
-    const start = new Date(v.start.date || v.start.dateTime).getTime();
-    const end = new Date(v.end.date || v.end.dateTime).getTime();
-    let day = 1000 * 60 * 60 * 24;
-    let t = 0;
-    while (start + t < end) {
-      if (Math.round((start + t) / day) in result)
-        result[Math.round((start + t) / day)].push(v);
-      else {
-        result[Math.round((start + t) / day)] = [v];
+  try {
+    const result = {};
+    events.forEach((v, i) => {
+      const start = new Date(v.start.date || v.start.dateTime).getTime();
+      const end = new Date(v.end.date || v.end.dateTime).getTime();
+      let day = 1000 * 60 * 60 * 24;
+      let t = 0;
+      while (start + t < end) {
+        if (Math.round((start + t) / day) in result)
+          result[Math.round((start + t) / day)].push(v);
+        else {
+          result[Math.round((start + t) / day)] = [v];
+        }
+        t += day;
       }
-      t += day;
-    }
-  });
-  return result;
+    });
+    return result;
+  } catch (err) {
+    console.log(err);
+  }
 }

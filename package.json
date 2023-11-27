@@ -1,7 +1,7 @@
 {
   "name": "wical",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "index.js",
   "repository": "https://github.com/Hyun-mo/wical.git",
   "author": "Hyunmo <hyunmo0417@gmail.com>",
   "license": "MIT",

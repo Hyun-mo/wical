@@ -1,16 +1,18 @@
 const IpcRenderer = require("electron").ipcRenderer;
+const ONE_DAY = 1000 * 60 * 60 * 24;
+
 let events = {};
 const lang = "ko";
 function init() {
-  getGoogleCalendar(new Date());
   let now_month = 0;
+  getGoogleCalendar(new Date());
   const arrow = document.getElementsByClassName("head-line")[0];
   arrow.addEventListener("click", (e) => {
     if (e.target.classList.contains("left")) now_month -= 1;
-    if (e.target.classList.contains("right")) now_month += 1;
+    else if (e.target.classList.contains("right")) now_month += 1;
+    else return;
     calRender(now_month, lang);
   });
-  calRender(0, lang);
 
   document.getElementById("calendar").addEventListener("click", (e) => {
     if (e.target.classList.contains("date-prev")) {
@@ -27,6 +29,8 @@ function init() {
         if (prev.length) prev[0].classList.remove("selected");
         e.target.classList.add("selected");
       }
+
+      console.log(getSchedule(new Date(e.target.id)));
     }
   });
   IpcRenderer.invoke("use-local-storage", { key: "config" }).then((result) => {
@@ -79,9 +83,8 @@ function calRender(now_month, lang) {
   }
 
   const date = new Date(month.getFullYear(), month.getMonth(), -month.getDay());
-  const day = 1000 * 60 * 60 * 24;
+  console.log("date");
   console.log(date);
-  console.log(events);
   for (let i = 0; i < 42; i++) {
     date.setDate(date.getDate() + 1);
     const mm = date.getMonth();
@@ -94,8 +97,7 @@ function calRender(now_month, lang) {
       el.className = "date";
       el.innerText = date.getDate();
       el.id = date;
-
-      if (date === now.getDate() && now_month === 0) {
+      if (date.getDate() === now.getDate() && now_month === 0) {
         el.className = "date today";
       }
     } else {
@@ -103,9 +105,8 @@ function calRender(now_month, lang) {
       el.innerText = date.getDate();
       el.id = date;
     }
-    if (events[Math.round(date.getTime() / day)]) {
-      const e = events[Math.round(date.getTime() / day)];
-      console.log(date);
+    if (events[Math.round(date.getTime() / ONE_DAY)]) {
+      const e = events[Math.round(date.getTime() / ONE_DAY)];
       const dot_box = document.createElement("div");
       dot_box.className = "dot-box";
       for (asd of e) {
@@ -136,6 +137,20 @@ function getGoogleCalendar(month) {
   }).then((result) => {
     events = result;
     calRender(0, lang);
+    console.log(getSchedule(new Date()));
+  });
+}
+
+/**
+ * return 7days schedules from the date
+ * @param {Date} date
+ */
+function getSchedule(date) {
+  // events[Math.round(date.getTime() / ONE_DAY)]
+  const days = Array.from({ length: 7 }, (_, i) => i);
+  console.log(date);
+  return days.map((i) => {
+    return events[Math.round(date.getTime() / ONE_DAY) + i];
   });
 }
 

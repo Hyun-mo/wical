@@ -79,7 +79,7 @@ async function listEvents(auth, start, end) {
     calendarId: "primary",
     timeMin: start.toISOString(),
     timeMax: end.toISOString(),
-    maxResults: 10,
+    // maxResults: 10,
     singleEvents: true,
     orderBy: "startTime",
   });
@@ -104,39 +104,43 @@ async function listEvents(auth, start, end) {
  * @returns {calendar_v3.Schema$Event[]}
  */
 async function getAllEvents(auth, start, end) {
-  const calendar = google.calendar({ version: "v3", auth });
-  const allEvents = [];
-  let timeMin = new Date().toISOString();
-  while (1) {
-    const res = await calendar.events.list({
-      calendarId: "primary",
-      timeMin: start,
-      timeMax: end,
-      //   maxResults: 30,
-      singleEvents: true,
-      orderBy: "startTime",
-    });
-    const events = res.data.items;
-    if (
-      !events ||
-      events.length === 0 ||
-      timeMin === events[events.length - 1].start.date ||
-      timeMin === events[events.length - 1].start.dateTime
-    ) {
-      // console.log("No upcoming events found.");
-      break;
+  try {
+    const calendar = google.calendar({ version: "v3", auth });
+    const allEvents = [];
+    let timeMin = new Date().toISOString();
+    while (1) {
+      const res = await calendar.events.list({
+        calendarId: "primary",
+        timeMin: start,
+        timeMax: end,
+        //   maxResults: 30,
+        singleEvents: true,
+        orderBy: "startTime",
+      });
+      const events = res.data.items;
+      if (
+        !events ||
+        events.length === 0 ||
+        timeMin === events[events.length - 1].start.date ||
+        timeMin === events[events.length - 1].start.dateTime
+      ) {
+        // console.log("No upcoming events found.");
+        break;
+      }
+      allEvents.push(...events);
+      timeMin =
+        events[events.length - 1].start.date ||
+        events[events.length - 1].start.dateTime;
     }
-    allEvents.push(...events);
-    timeMin =
-      events[events.length - 1].start.date ||
-      events[events.length - 1].start.dateTime;
-  }
 
-  allEvents.map((event, i) => {
-    const start = event.start.dateTime || event.start.date;
-    console.log(`${start} - ${event.summary}`);
-  });
-  return allEvents;
+    allEvents.map((event, i) => {
+      const start = event.start.dateTime || event.start.date;
+      console.log(`${start} - ${event.summary}`);
+    });
+    return allEvents;
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 //get calendar id
