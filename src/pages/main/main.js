@@ -1,4 +1,5 @@
 const IpcRenderer = require("electron").ipcRenderer;
+const { i18n_month, i18n_days } = require("../../../i18n");
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
 let events = {};
@@ -13,7 +14,7 @@ function init() {
     else return;
     calRender(now_month, lang);
   });
-
+  calRender(0, lang);
   document.getElementById("calendar").addEventListener("click", (e) => {
     if (e.target.classList.contains("date-prev")) {
       now_month -= 1;
@@ -25,12 +26,12 @@ function init() {
       const prev = document.getElementsByClassName("selected");
       if (e.target.classList.contains("selected")) {
         e.target.classList.remove("selected");
+        console.log(getSchedule(new Date()));
       } else {
         if (prev.length) prev[0].classList.remove("selected");
         e.target.classList.add("selected");
+        console.log(getSchedule(new Date(e.target.id)));
       }
-
-      console.log(getSchedule(new Date(e.target.id)));
     }
   });
   IpcRenderer.invoke("use-local-storage", { key: "config" }).then((result) => {
@@ -46,36 +47,10 @@ function calRender(now_month, lang) {
   month.setMonth(month.getMonth() + now_month);
   const this_month = month.getMonth();
   const Month = document.getElementById("month");
-  const days = {
-    ko: ["일", "월", "화", "수", "목", "금", "토"],
-    en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    ch: ["日", "月", "火", "水", "木", "金", "土"],
-  };
-  const en_month = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "Octorber",
-    "November",
-    "December",
-  ];
-  if (lang === "ko") {
-    Month.innerText = `${month.getMonth() + 1}` + "월";
-  } else if (lang === "en") {
-    Month.style.width = "11rem";
-    Month.innerText = en_month[month.getMonth()];
-  } else {
-    Month.innerText = `${month.getMonth() + 1}` + "月";
-  }
+  Month.innerText = i18n_month[lang][month.getMonth()];
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
-  for (const day of days[lang]) {
+  for (const day of i18n_days[lang]) {
     const el = document.createElement("span");
     el.className = "day";
     el.innerText = day;

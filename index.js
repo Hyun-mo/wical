@@ -56,8 +56,10 @@ function parseData() {
   const defaultData = {
     config: {
       startingApp: false,
-      onlyCalc: true,
+      onlyCalendar: true,
       resizable: true,
+      language: "ko",
+      today_mark: true,
     },
   };
   try {
