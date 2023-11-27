@@ -3,7 +3,7 @@ const { i18n_month, i18n_days } = require("../../../i18n");
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
 let events = {};
-const lang = "ko";
+let lang;
 function init() {
   let now_month = 0;
   getGoogleCalendar(new Date());
@@ -14,7 +14,6 @@ function init() {
     else return;
     calRender(now_month, lang);
   });
-  calRender(0, lang);
   document.getElementById("calendar").addEventListener("click", (e) => {
     if (e.target.classList.contains("date-prev")) {
       now_month -= 1;
@@ -36,7 +35,9 @@ function init() {
   });
   IpcRenderer.invoke("use-local-storage", { key: "config" }).then((result) => {
     console.log(result);
+    lang = result.language;
     console.log("renderer, handle");
+    calRender(0, lang);
   });
 }
 
@@ -48,6 +49,7 @@ function calRender(now_month, lang) {
   const this_month = month.getMonth();
   const Month = document.getElementById("month");
   Month.innerText = i18n_month[lang][month.getMonth()];
+  if (lang === "en") Month.style.width = "11rem";
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
   for (const day of i18n_days[lang]) {
