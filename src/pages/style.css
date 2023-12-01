@@ -18,7 +18,6 @@ p {
 }
 button,
 input {
-  appearance: none;
   border: 0;
   padding: 0;
   background-color: transparent;
@@ -30,14 +29,14 @@ button {
 }
 .head-line {
   /* -webkit-app-region: drag; */
-  font-size: 2.4rem;
+  font-size: 2rem;
   display: flex;
   justify-content: center;
   padding-inline: 20px;
 }
 
 #month {
-  width: 5rem;
+  width: 4rem;
   display: flex;
   justify-content: center;
 }
@@ -175,8 +174,8 @@ button {
 .arrow {
   border: solid #e3e3e3;
   border-width: 0 3px 3px 0;
-  height: 1.6rem;
-  width: 1.6rem;
+  height: 1.4rem;
+  width: 1.4rem;
   border-radius: 2px;
 }
 
@@ -189,5 +188,31 @@ button {
 }
 
 .next-schedule {
-  display: none;
+  padding: 5px;
+}
+
+/* setting */
+.setting-done {
+  width: 90%;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  font-size: 2rem;
+  background: #4146c8;
+  align-items: center;
+  border-radius: 10px;
+  margin-block: 10px;
+  position: absolute;
+  bottom: 10px;
+  left: 5%;
+}
+
+.setting-check {
+  padding: 5px;
+  display: flex;
+  margin-left: 20px;
+}
+
+.setting-label {
+  margin-left: 10px;
 }

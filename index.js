@@ -5,13 +5,15 @@ const google = require("./src/api/google");
 const dataPath = app.getPath("userData");
 const filePath = path.join(dataPath, "config.json");
 const isDev = process.env.NODE_ENV === "development";
+let win;
 parseData();
 async function createWindow() {
   const config = readData("config");
-  const win = new BrowserWindow({
+  console.log(config);
+  win = new BrowserWindow({
     transparent: true,
     width: isDev ? 900 : 240,
-    height: config.onlyCalc ? 300 : 500,
+    height: config.general.onlyCalendar ? 300 : 500,
     webPreferences: {
       // preload: path.join(__dirname, "src", "preload.js"),
       contextIsolation: false,
@@ -20,9 +22,8 @@ async function createWindow() {
     titleBarStyle: "customButtonsOnHover",
     frame: false,
   });
-
   if (isDev) win.webContents.openDevTools();
-  win.loadFile(path.join(__dirname, "src", "pages", "main", "main.html"));
+  win.loadFile(path.join(__dirname, "src/pages/main/main.html"));
 }
 
 app.on("ready", () => {
@@ -55,11 +56,13 @@ function readData(key) {
 function parseData() {
   const defaultData = {
     config: {
-      startingApp: false,
-      onlyCalendar: true,
-      resizable: true,
+      general: {
+        startingApp: false,
+        onlyCalendar: true,
+        resizable: true,
+        todayMark: true,
+      },
       language: "ko",
-      today_mark: true,
     },
   };
   try {
@@ -70,6 +73,15 @@ function parseData() {
     return defaultData;
   }
 }
+ipcMain.handle("goto", (_, { URL, config }) => {
+  console.log(config);
+  win.setSize(
+    isDev ? 900 : 240,
+    config?.general.onlyCalendar ? 300 : 500,
+    true
+  );
+  win.loadFile(URL);
+});
 
 ipcMain.handle("use-local-storage", (_, data) => {
   console.log(data["key"]);
@@ -83,7 +95,6 @@ ipcMain.handle("google-login", (_, data) => {
 });
 
 ipcMain.handle("google-get-calendar", (_, { start, end }) => {
-  console.log(start, end);
   return google
     .authorize()
     .then((auth) => google.listEvents(auth, start, end))

@@ -1,27 +1,29 @@
 const IpcRenderer = require("electron").ipcRenderer;
 const { i18n_month, i18n_days } = require("../../../i18n");
+const path = require("path");
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
 let events = {};
-let lang;
+let config;
 function init() {
   let now_month = 0;
   getGoogleCalendar(new Date());
-  const arrow = document.getElementsByClassName("head-line")[0];
-  arrow.addEventListener("click", (e) => {
+  const Arrow = document.getElementsByClassName("head-line")[0];
+  Arrow.addEventListener("click", (e) => {
     if (e.target.classList.contains("left")) now_month -= 1;
     else if (e.target.classList.contains("right")) now_month += 1;
     else return;
-    calRender(now_month, lang);
+    calRender(now_month, config.language);
+  });
+  const Setting = document.getElementById("setting-btn");
+  Setting.addEventListener("click", () => {
+    IpcRenderer.invoke("goto", {
+      URL: path.join(__dirname, "../setting/setting.html"),
+      config: undefined,
+    });
   });
   document.getElementById("calendar").addEventListener("click", (e) => {
-    if (e.target.classList.contains("date-prev")) {
-      now_month -= 1;
-      calRender(now_month, lang);
-    } else if (e.target.classList.contains("date-next")) {
-      now_month += 1;
-      calRender(now_month, lang);
-    } else if (e.target.classList.contains("date")) {
+    if (e.target.classList.contains("date")) {
       const prev = document.getElementsByClassName("selected");
       if (e.target.classList.contains("selected")) {
         e.target.classList.remove("selected");
@@ -30,14 +32,15 @@ function init() {
         if (prev.length) prev[0].classList.remove("selected");
         e.target.classList.add("selected");
         console.log(getSchedule(new Date(e.target.id)));
+        ShowNextSchedule(new Date(e.target.id));
       }
     }
   });
   IpcRenderer.invoke("use-local-storage", { key: "config" }).then((result) => {
-    console.log(result);
-    lang = result.language;
-    console.log("renderer, handle");
-    calRender(0, lang);
+    config = result;
+    calRender(0, config.language);
+    const NextSchedule = document.getElementsByClassName("next-schedule")[0];
+    if (!config.general.onlyCalendar) NextSchedule.classList.remove("hidden");
   });
 }
 
@@ -74,7 +77,11 @@ function calRender(now_month, lang) {
       el.className = "date";
       el.innerText = date.getDate();
       el.id = date;
-      if (date.getDate() === now.getDate() && now_month === 0) {
+      if (
+        config.general.todayMark &&
+        date.getDate() === now.getDate() &&
+        now_month === 0
+      ) {
         el.className = "date today";
       }
     } else {
@@ -113,21 +120,35 @@ function getGoogleCalendar(month) {
     end: end,
   }).then((result) => {
     events = result;
-    calRender(0, lang);
+    calRender(0, config.language);
     console.log(getSchedule(new Date()));
   });
 }
 
-/**
- * return 7days schedules from the date
- * @param {Date} date
- */
 function getSchedule(date) {
   // events[Math.round(date.getTime() / ONE_DAY)]
   const days = Array.from({ length: 7 }, (_, i) => i);
   console.log(date);
   return days.map((i) => {
     return events[Math.round(date.getTime() / ONE_DAY) + i];
+  });
+}
+/**
+ * show 7days schedules from the date
+ * @param {Date} date
+ */
+function ShowNextSchedule(date) {
+  if (config.general.onlyCalendar) return;
+  const days = Array.from({ length: 7 }, (_, i) => i);
+  const Schedule = document.getElementById("schedule");
+  Schedule.innerHTML = "";
+  days.map((i) => {
+    const schedule = events[Math.round(date.getTime() / ONE_DAY) + i];
+    schedule?.forEach((v) => {
+      const p = document.createElement("p");
+      p.innerText = v.summary;
+      Schedule.appendChild(p);
+    });
   });
 }
 

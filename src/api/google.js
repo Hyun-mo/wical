@@ -73,8 +73,6 @@ async function authorize() {
  */
 async function listEvents(auth, start, end) {
   const calendar = google.calendar({ version: "v3", auth });
-  console.log(start);
-  console.log(end);
   const res = await calendar.events.list({
     calendarId: "primary",
     timeMin: start.toISOString(),
@@ -89,10 +87,6 @@ async function listEvents(auth, start, end) {
     return;
   }
   console.log("Upcoming 10 events:");
-  events.map((event, i) => {
-    const start = event.start.dateTime || event.start.date;
-    console.log(`${start} - ${event.summary}`);
-  });
   return events;
 }
 
@@ -133,10 +127,6 @@ async function getAllEvents(auth, start, end) {
         events[events.length - 1].start.dateTime;
     }
 
-    allEvents.map((event, i) => {
-      const start = event.start.dateTime || event.start.date;
-      console.log(`${start} - ${event.summary}`);
-    });
     return allEvents;
   } catch (err) {
     console.log(err);
