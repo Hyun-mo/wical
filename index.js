@@ -6,10 +6,8 @@ const dataPath = app.getPath("userData");
 const filePath = path.join(dataPath, "config.json");
 const isDev = process.env.NODE_ENV === "development";
 let win;
-parseData();
-async function createWindow() {
-  const config = readData("config");
-  console.log(config);
+
+async function createWindow(config) {
   win = new BrowserWindow({
     transparent: true,
     width: isDev ? 900 : 240,
@@ -27,8 +25,7 @@ async function createWindow() {
 }
 
 app.on("ready", () => {
-  createWindow();
-
+  init().then(createWindow).catch(console.log);
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -42,39 +39,7 @@ app.on("window-all-closed", () => {
   }
 });
 
-function writeData(key, value) {
-  let contents = parseData();
-  contents[key] = value;
-  fs.writeFileSync(filePath, JSON.stringify(contents));
-}
-
-function readData(key) {
-  let contents = parseData();
-  return contents[key];
-}
-
-function parseData() {
-  const defaultData = {
-    config: {
-      general: {
-        startingApp: false,
-        onlyCalendar: true,
-        resizable: true,
-        todayMark: true,
-      },
-      language: "ko",
-    },
-  };
-  try {
-    return JSON.parse(fs.readFileSync(filePath));
-  } catch (error) {
-    if (!fs.existsSync(filePath))
-      fs.writeFileSync(filePath, JSON.stringify(defaultData));
-    return defaultData;
-  }
-}
 ipcMain.handle("goto", (_, { URL, config }) => {
-  console.log(config);
   win.setSize(
     isDev ? 900 : 240,
     config?.general.onlyCalendar ? 300 : 500,
@@ -83,22 +48,27 @@ ipcMain.handle("goto", (_, { URL, config }) => {
   win.loadFile(URL);
 });
 
-ipcMain.handle("use-local-storage", (_, data) => {
-  console.log(data["key"]);
-  if ("value" in data) return writeData(data["key"], data["value"]);
-  return readData(data["key"]);
+ipcMain.handle("use-config-storage", async (_, value) => {
+  if (value) return writeData("config", value);
+  return readData("config");
 });
 
-ipcMain.handle("google-login", (_, data) => {
-  console.log(data);
-  return google.authorize();
+ipcMain.handle("google-get-calendar-event", async (_, { start, end }) => {
+  const auth = await google.authorize();
+  const config = readData("config");
+  const result = await Promise.all(
+    Object.keys(config.activeCalendarList)
+      .filter((key) => config.activeCalendarList[key])
+      .map(async (id) => await google.getAllEvents(auth, start, end, id))
+  );
+
+  return event_to_hash([].concat(...result));
 });
 
-ipcMain.handle("google-get-calendar", (_, { start, end }) => {
-  return google
-    .authorize()
-    .then((auth) => google.listEvents(auth, start, end))
-    .then(event_to_hash);
+ipcMain.handle("google-get-calendar-list", async (_) => {
+  const auth = await google.authorize();
+  const data = await google.calendarList(auth);
+  return data.items;
 });
 
 /**
@@ -127,4 +97,57 @@ function event_to_hash(events) {
   } catch (err) {
     console.log(err);
   }
+}
+
+function writeData(key, value) {
+  let contents = parseData();
+  contents[key] = value;
+  fs.writeFileSync(filePath, JSON.stringify(contents));
+}
+
+function readData(key) {
+  let contents = parseData();
+  return contents[key];
+}
+
+function parseData() {
+  const defaultData = {
+    config: {
+      general: {
+        startingApp: false,
+        onlyCalendar: true,
+        resizable: true,
+        todayMark: true,
+      },
+      language: "ko",
+      calendarList: [],
+      activeCalendarList: {},
+      nextSyncToken: "",
+    },
+  };
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath));
+    return data;
+  } catch (error) {
+    if (!fs.existsSync(filePath))
+      fs.writeFileSync(filePath, JSON.stringify(defaultData));
+    return defaultData;
+  }
+}
+
+async function init() {
+  const config = readData("config");
+  const calList = await google.authorize().then(google.calendarList);
+  config.calendarList = calList.items;
+  calList.items.forEach((item) => {
+    if (!(item.id in config.activeCalendarList))
+      config.activeCalendarList[item.id] = true;
+  });
+  Object.keys(config.activeCalendarList).forEach((id) => {
+    if (!calList.items.find((item) => item.id === id))
+      delete config.activeCalendarList[id];
+  });
+  // config.nextSyncToken = calList.nextSyncToken;
+  writeData("config", config);
+  return config;
 }

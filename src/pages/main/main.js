@@ -36,7 +36,7 @@ function init() {
       }
     }
   });
-  IpcRenderer.invoke("use-local-storage", { key: "config" }).then((result) => {
+  IpcRenderer.invoke("use-config-storage").then((result) => {
     config = result;
     calRender(0, config.language);
     const NextSchedule = document.getElementsByClassName("next-schedule")[0];
@@ -89,16 +89,25 @@ function calRender(now_month, lang) {
       el.innerText = date.getDate();
       el.id = date;
     }
-    if (events[Math.round(date.getTime() / ONE_DAY)]) {
-      const e = events[Math.round(date.getTime() / ONE_DAY)];
+    const color = {};
+    config.calendarList.forEach((item) => {
+      console.log(item);
+      color[item.id] = item.backgroundColor;
+    });
+    const ev = events[Math.round(date.getTime() / ONE_DAY)];
+    if (ev) {
       const dot_box = document.createElement("div");
       dot_box.className = "dot-box";
-      for (asd of e) {
-        const dot = document.createElement("span");
-        dot.className = "dot";
-        dot_box.appendChild(dot);
-        el.appendChild(dot_box);
-      }
+      const max_color = 3;
+      Array.from(new Set(ev.map((e) => color[e.creator.email])))
+        .slice(0, max_color)
+        .forEach((event_color) => {
+          const dot = document.createElement("span");
+          dot.className = "dot";
+          dot.style.backgroundColor = event_color;
+          dot_box.appendChild(dot);
+          el.appendChild(dot_box);
+        });
     }
     calendar.appendChild(el);
   }
@@ -111,17 +120,16 @@ function calRender(now_month, lang) {
 function getGoogleCalendar(month) {
   const year = month.getFullYear();
   if (year in events) return;
-  const start = new Date(month.getFullYear(), 0, 1);
-  const end = new Date(month.getFullYear() + 1, 0, 0);
-  console.log(start);
-  console.log(end);
-  IpcRenderer.invoke("google-get-calendar", {
+  const start = new Date(month.getFullYear() - 1, 0, 1);
+  const end = new Date(month.getFullYear() + 1, 0, 1);
+  IpcRenderer.invoke("google-get-calendar-event", {
     start: start,
     end: end,
   }).then((result) => {
     events = result;
+    console.log(result);
     calRender(0, config.language);
-    console.log(getSchedule(new Date()));
+    // console.log(getSchedule(new Date()));
   });
 }
 

@@ -71,8 +71,9 @@ async function authorize() {
  * @param {Date} end Date type.
  * @returns {calendar_v3.Schema$Event[]}
  */
-async function listEvents(auth, start, end) {
+async function listEvents(auth, start, end, id = "primary") {
   const calendar = google.calendar({ version: "v3", auth });
+  console.log(id);
   const res = await calendar.events.list({
     calendarId: "primary",
     timeMin: start.toISOString(),
@@ -97,14 +98,15 @@ async function listEvents(auth, start, end) {
  * @param {Date} end Date type.
  * @returns {calendar_v3.Schema$Event[]}
  */
-async function getAllEvents(auth, start, end) {
+async function getAllEvents(auth, start, end, id = "primary") {
   try {
+    console.log(id);
     const calendar = google.calendar({ version: "v3", auth });
     const allEvents = [];
     let timeMin = new Date().toISOString();
     while (1) {
       const res = await calendar.events.list({
-        calendarId: "primary",
+        calendarId: id,
         timeMin: start,
         timeMax: end,
         //   maxResults: 30,
@@ -129,7 +131,7 @@ async function getAllEvents(auth, start, end) {
 
     return allEvents;
   } catch (err) {
-    console.log(err);
+    console.log(id);
   }
 }
 
@@ -137,7 +139,8 @@ async function getAllEvents(auth, start, end) {
 async function calendarList(auth) {
   const calendar = google.calendar({ version: "v3", auth });
   const calendar_list = await calendar.calendarList.list();
-  console.log(calendar_list.data.items);
+  // console.log(calendar_list.data.items);
+  return calendar_list.data;
 }
 
 // authorize().then(calendarList).catch(console.error);
