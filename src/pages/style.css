@@ -73,6 +73,11 @@ button {
   padding: 2.5px;
   border-radius: 50%;
   background-color: #e3e3e3;
+  margin-inline: 1px;
+}
+.dot-big {
+  padding: 4px;
+  margin-inline: 8px;
 }
 
 .dot-box {
@@ -90,10 +95,11 @@ button {
 }
 
 .division-line {
-  border-top: 4px solid #e2e2e2;
-  width: 3rem;
+  border-top: 2px solid #727272;
+  width: 15%;
   margin: auto;
-  border-radius: 3px;
+  border-radius: 2px;
+  margin-block: 5px;
 }
 
 .calendar {
@@ -154,7 +160,7 @@ button {
 .selected {
   height: 80%;
   border-radius: 5px;
-  outline: solid 3px #3f47e7;
+  outline: solid 3px #7986cb;
 }
 
 .gear {
@@ -189,6 +195,15 @@ button {
 
 .next-schedule {
   padding: 5px;
+}
+.schedule {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.schedule-day {
+  padding-inline: 5px;
+  font-weight: bold;
 }
 
 /* setting */

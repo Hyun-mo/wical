@@ -24,5 +24,19 @@ const i18n_days = {
   ja: ["日", "月", "火", "水", "木", "金", "土"],
 };
 
-module.exports = { i18n_language_list, i18n_month, i18n_days };
+const i18n_full_days = {
+  ko: ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"],
+  en: [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ],
+  ja: ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"],
+};
+
+module.exports = { i18n_language_list, i18n_month, i18n_days, i18n_full_days };
 // export { i18n_language_list, i18n_month, i18n_days };

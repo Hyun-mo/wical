@@ -1,5 +1,5 @@
 const IpcRenderer = require("electron").ipcRenderer;
-const { i18n_month, i18n_days } = require("../../../i18n");
+const { i18n_month, i18n_days, i18n_full_days } = require("../../../i18n");
 const path = require("path");
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
@@ -27,11 +27,10 @@ function init() {
       const prev = document.getElementsByClassName("selected");
       if (e.target.classList.contains("selected")) {
         e.target.classList.remove("selected");
-        console.log(getSchedule(new Date()));
+        ShowNextSchedule(new Date());
       } else {
         if (prev.length) prev[0].classList.remove("selected");
         e.target.classList.add("selected");
-        console.log(getSchedule(new Date(e.target.id)));
         ShowNextSchedule(new Date(e.target.id));
       }
     }
@@ -63,8 +62,6 @@ function calRender(now_month, lang) {
   }
 
   const date = new Date(month.getFullYear(), month.getMonth(), -month.getDay());
-  console.log("date");
-  console.log(date);
   for (let i = 0; i < 42; i++) {
     date.setDate(date.getDate() + 1);
     const mm = date.getMonth();
@@ -91,26 +88,25 @@ function calRender(now_month, lang) {
     }
     const color = {};
     config.calendarList.forEach((item) => {
-      console.log(item);
       color[item.id] = item.backgroundColor;
     });
     const ev = events[Math.round(date.getTime() / ONE_DAY)];
     if (ev) {
       const dot_box = document.createElement("div");
       dot_box.className = "dot-box";
-      const max_color = 3;
-      Array.from(new Set(ev.map((e) => color[e.creator.email])))
-        .slice(0, max_color)
-        .forEach((event_color) => {
-          const dot = document.createElement("span");
-          dot.className = "dot";
-          dot.style.backgroundColor = event_color;
-          dot_box.appendChild(dot);
-          el.appendChild(dot_box);
-        });
+      const max_account = 3;
+      const accounts = [...new Set(ev.map((e) => e.creator.email))];
+      accounts.slice(0, max_account).forEach((account) => {
+        const dot = document.createElement("span");
+        dot.className = "dot";
+        dot.style.backgroundColor = color[account];
+        dot_box.appendChild(dot);
+        el.appendChild(dot_box);
+      });
     }
     calendar.appendChild(el);
   }
+  ShowNextSchedule(new Date());
 }
 
 /**
@@ -127,20 +123,10 @@ function getGoogleCalendar(month) {
     end: end,
   }).then((result) => {
     events = result;
-    console.log(result);
     calRender(0, config.language);
-    // console.log(getSchedule(new Date()));
   });
 }
 
-function getSchedule(date) {
-  // events[Math.round(date.getTime() / ONE_DAY)]
-  const days = Array.from({ length: 7 }, (_, i) => i);
-  console.log(date);
-  return days.map((i) => {
-    return events[Math.round(date.getTime() / ONE_DAY) + i];
-  });
-}
 /**
  * show 7days schedules from the date
  * @param {Date} date
@@ -149,14 +135,50 @@ function ShowNextSchedule(date) {
   if (config.general.onlyCalendar) return;
   const days = Array.from({ length: 7 }, (_, i) => i);
   const Schedule = document.getElementById("schedule");
+  const color = {};
+  config.calendarList.forEach((item) => {
+    color[item.id] = item.backgroundColor;
+  });
   Schedule.innerHTML = "";
+  const event_set = new Set();
   days.map((i) => {
-    const schedule = events[Math.round(date.getTime() / ONE_DAY) + i];
-    schedule?.forEach((v) => {
-      const p = document.createElement("p");
-      p.innerText = v.summary;
-      Schedule.appendChild(p);
-    });
+    const schedule = events[Math.round(date.getTime() / ONE_DAY)];
+    date.setDate(date.getDate() + 1);
+    if (!schedule) return;
+    const event_list = schedule.filter((e) => !event_set.has(e.id));
+    if (event_list.length) {
+      const line = document.createElement("div");
+      line.className = "division-line";
+      Schedule.appendChild(line);
+      const day = document.createElement("p");
+      day.className = "schedule-day";
+      day.innerText = i18n_full_days[config.language][(date.getDay() + 6) % 7];
+      Schedule.appendChild(day);
+      event_list.forEach((event) => {
+        event_set.add(event.id);
+        const p = document.createElement("p");
+        const dot = document.createElement("span");
+        const div = document.createElement("div");
+        div.className = "schedule";
+        dot.className = "dot dot-big";
+        dot.style.backgroundColor = color[event.creator.email];
+        p.innerText = event.summary;
+        const end = new Date(event.end.date || event.end.dateTime);
+        const start = new Date(event.start.date || event.start.dateTime);
+        if (event.end.date) end.setDate(end.getDate() - 1);
+        if (
+          Math.round(end.getTime() / ONE_DAY) !==
+          Math.round(start.getTime() / ONE_DAY)
+        ) {
+          p.innerText +=
+            "(" + "~" + Number(end.getMonth() + 1) + "." + end.getDate() + ")";
+        }
+
+        div.appendChild(dot);
+        div.appendChild(p);
+        Schedule.appendChild(div);
+      });
+    }
   });
 }
 

@@ -2,6 +2,8 @@ const fs = require("fs").promises;
 const path = require("path");
 const { authenticate } = require("@google-cloud/local-auth");
 const { google, calendar_v3 } = require("googleapis");
+const { parseData, readData, writeData } = require("./loaclStorage");
+
 // https://developers.google.com/calendar/api/guides/overview?hl=ko
 // If modifying these scopes, delete token.json.
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
@@ -105,13 +107,14 @@ async function getAllEvents(auth, start, end, id = "primary") {
     const allEvents = [];
     let timeMin = new Date().toISOString();
     while (1) {
+      console.log("get list");
       const res = await calendar.events.list({
         calendarId: id,
         timeMin: start,
         timeMax: end,
-        //   maxResults: 30,
+        maxResults: 200,
         singleEvents: true,
-        orderBy: "startTime",
+        // orderBy: "startTime",
       });
       const events = res.data.items;
       if (
@@ -120,15 +123,15 @@ async function getAllEvents(auth, start, end, id = "primary") {
         timeMin === events[events.length - 1].start.date ||
         timeMin === events[events.length - 1].start.dateTime
       ) {
-        // console.log("No upcoming events found.");
+        console.log("No upcoming events found.");
         break;
       }
       allEvents.push(...events);
+      console.log(allEvents.length);
       timeMin =
         events[events.length - 1].start.date ||
         events[events.length - 1].start.dateTime;
     }
-
     return allEvents;
   } catch (err) {
     console.log(id);
@@ -145,4 +148,36 @@ async function calendarList(auth) {
 
 // authorize().then(calendarList).catch(console.error);
 
-module.exports = { authorize, calendarList, getAllEvents, listEvents };
+async function initalSync(auth, start, end, id) {
+  const calendar = google.calendar({ version: "v3", auth });
+  console.log(id);
+  let allEvents = [];
+  let data = {};
+  let pageToken;
+  do {
+    const res = await calendar.events.list({
+      calendarId: id,
+      // timeMin: start.toISOString(),
+      // timeMax: end.toISOString(),
+      singleEvents: true,
+      orderBy: "startTime",
+    });
+    const events = res.data.items;
+    allEvents.push(...events);
+    pageToken = res.data.nextPageToken;
+    data[id].SYNC_TOKEN_KEY = res.data.nextSyncToken;
+  } while (pageToken);
+  console.log(data[id]);
+  data[id] = allEvents;
+  writeData("calendar", data);
+}
+
+function synchronize(auth) {}
+
+module.exports = {
+  authorize,
+  calendarList,
+  getAllEvents,
+  listEvents,
+  initalSync,
+};
