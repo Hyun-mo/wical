@@ -8,6 +8,7 @@ body {
   font-size: 1.6rem;
   margin: 0;
   user-select: none;
+  overflow: hidden;
 }
 a {
   text-decoration: none;
@@ -195,6 +196,11 @@ button {
 
 .next-schedule {
   padding: 5px;
+  height: 200px;
+  overflow: auto;
+}
+.next-schedule::-webkit-scrollbar {
+  display: none;
 }
 .schedule {
   display: flex;

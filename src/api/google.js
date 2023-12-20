@@ -150,7 +150,6 @@ async function calendarList(auth) {
 
 async function synchronize(auth, start, end, id) {
   const calendar = google.calendar({ version: "v3", auth });
-  console.log(id);
   let allEvents = readData(id)?.event || [];
   let data = { SYNC_TOKEN_KEY: "", event: [] };
   let pageToken;

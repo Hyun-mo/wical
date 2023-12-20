@@ -39,39 +39,38 @@ function init() {
       p.appendChild(label);
       General.appendChild(p);
     });
+  });
+  IpcRenderer.invoke("use-calendar-storage").then((result) => {
+    const calendar = result;
     const Account = document.getElementById("account");
     Account.className = "head-line";
     const p = document.createElement("p");
-    p.innerText = config.calendarList.find((item) => item.primary).id;
+    p.innerText = calendar.calendarList.find((item) => item.primary).id;
     Account.append(p);
     const CalendarList = document.getElementById("calendar-list");
-    config.calendarList.forEach((calendar) => {
+    calendar.calendarList.forEach((account) => {
       const p = document.createElement("p");
       const label = document.createElement("label");
       const input = document.createElement("input");
       p.setAttribute("class", "setting-check");
       label.setAttribute("class", "setting-label");
       input.type = "checkbox";
-      input.checked = config.activeCalendarList[calendar.id];
-      input.value = calendar.primary ? "primary" : calendar.summary;
+      input.checked = calendar.activeCalendarList[account.id];
+      input.value = account.primary ? "primary" : account.summary;
       input.name = "g[]";
-      input.id = calendar.id;
-      label.innerText = calendar.primary
+      input.id = account.id;
+      label.innerText = account.primary
         ? "primary"
-        : calendar.summaryOverride || calendar.summary;
-      label.setAttribute(
-        "for",
-        calendar.primary ? "primary" : calendar.summary
-      );
+        : account.summaryOverride || account.summary;
+      label.setAttribute("for", account.primary ? "primary" : account.summary);
       input.onclick = (e) => {
-        config.activeCalendarList[calendar.id] = e.target.checked;
+        calendar.activeCalendarList[calendar.id] = e.target.checked;
       };
       p.appendChild(input);
       p.appendChild(label);
       CalendarList.appendChild(p);
     });
   });
-  // IpcRenderer.invoke("google-get-calendar-list").then(console.log);
 }
 
 init();
