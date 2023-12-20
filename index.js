@@ -24,7 +24,9 @@ async function createWindow(config) {
 }
 
 app.on("ready", () => {
-  init().then(createWindow).catch(console.log);
+  init();
+  const config = readData("config");
+  createWindow(config);
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -52,13 +54,21 @@ ipcMain.handle("use-config-storage", async (_, value) => {
   return readData("config");
 });
 
+ipcMain.handle("use-calendar-storage", async (_, value) => {
+  if (value) return writeData("calendar", value);
+  return readData("calendar");
+});
+
 ipcMain.handle("google-get-calendar-event", async (_, { start, end }) => {
   const auth = await google.authorize();
-  const config = readData("config");
+  const calendar = readData("calendar");
+  const active_calendar =
+    Object.keys(calendar.activeCalendarList) ||
+    (await google.calendarList(auth)).items;
   const result = await Promise.all(
-    Object.keys(config.activeCalendarList)
-      .filter((key) => config.activeCalendarList[key])
-      .map(async (id) => await google.initalSync(auth, start, end, id))
+    active_calendar
+      .filter((key) => calendar.activeCalendarList[key])
+      .map(async (id) => await google.synchronize(auth, start, end, id))
   );
 
   return event_to_hash([].concat(...result));
@@ -98,19 +108,21 @@ function event_to_hash(events) {
   }
 }
 
-async function init() {
-  const config = readData("config");
-  // const calList = await google.authorize().then(google.calendarList);
-  // config.calendarList = calList.items;
-  // calList.items.forEach((item) => {
-  //   if (!(item.id in config.activeCalendarList))
-  //     config.activeCalendarList[item.id] = true;
-  // });
-  // Object.keys(config.activeCalendarList).forEach((id) => {
-  //   if (!calList.items.find((item) => item.id === id))
-  //     delete config.activeCalendarList[id];
-  // });
-  // config.nextSyncToken = calList.nextSyncToken;
-  writeData("config", config);
-  return config;
+function init() {
+  const calendar = readData("calendar");
+  google
+    .authorize()
+    .then(google.calendarList)
+    .then((calList) => {
+      calendar.calendarList = calList.items;
+      calList.items.forEach((item) => {
+        if (!(item.id in calendar.activeCalendarList))
+          calendar.activeCalendarList[item.id] = true;
+      });
+      Object.keys(calendar.activeCalendarList).forEach((id) => {
+        if (!calList.items.find((item) => item.id === id))
+          delete calendar.activeCalendarList[id];
+      });
+      writeData("calendar", calendar);
+    });
 }

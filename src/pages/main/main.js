@@ -5,6 +5,7 @@ const ONE_DAY = 1000 * 60 * 60 * 24;
 
 let events = {};
 let config;
+let calendar;
 function init() {
   let now_month = 0;
   getGoogleCalendar(new Date());
@@ -35,6 +36,9 @@ function init() {
       }
     }
   });
+  IpcRenderer.invoke("use-calendar-storage").then((result) => {
+    calendar = result;
+  });
   IpcRenderer.invoke("use-config-storage").then((result) => {
     config = result;
     calRender(0, config.language);
@@ -52,13 +56,13 @@ function calRender(now_month, lang) {
   const Month = document.getElementById("month");
   Month.innerText = i18n_month[lang][month.getMonth()];
   if (lang === "en") Month.style.width = "11rem";
-  const calendar = document.getElementById("calendar");
-  calendar.innerHTML = "";
+  const Calendar = document.getElementById("calendar");
+  Calendar.innerHTML = "";
   for (const day of i18n_days[lang]) {
     const el = document.createElement("span");
     el.className = "day";
     el.innerText = day;
-    calendar.appendChild(el);
+    Calendar.appendChild(el);
   }
 
   const date = new Date(month.getFullYear(), month.getMonth(), -month.getDay());
@@ -86,8 +90,9 @@ function calRender(now_month, lang) {
       el.innerText = date.getDate();
       el.id = date;
     }
+    if (!events) return;
     const color = {};
-    config.calendarList.forEach((item) => {
+    calendar.calendarList.forEach((item) => {
       color[item.id] = item.backgroundColor;
     });
     const ev = events[Math.round(date.getTime() / ONE_DAY)];
@@ -104,7 +109,7 @@ function calRender(now_month, lang) {
         el.appendChild(dot_box);
       });
     }
-    calendar.appendChild(el);
+    Calendar.appendChild(el);
   }
   ShowNextSchedule(new Date());
 }
@@ -136,7 +141,7 @@ function ShowNextSchedule(date) {
   const days = Array.from({ length: 7 }, (_, i) => i);
   const Schedule = document.getElementById("schedule");
   const color = {};
-  config.calendarList.forEach((item) => {
+  calendar.calendarList.forEach((item) => {
     color[item.id] = item.backgroundColor;
   });
   Schedule.innerHTML = "";

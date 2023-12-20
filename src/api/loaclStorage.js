@@ -25,9 +25,10 @@ function parseData() {
         todayMark: true,
       },
       language: "ko",
+    },
+    calendar: {
       calendarList: [],
       activeCalendarList: {},
-      nextSyncToken: "",
     },
   };
   try {

@@ -148,36 +148,37 @@ async function calendarList(auth) {
 
 // authorize().then(calendarList).catch(console.error);
 
-async function initalSync(auth, start, end, id) {
+async function synchronize(auth, start, end, id) {
   const calendar = google.calendar({ version: "v3", auth });
   console.log(id);
-  let allEvents = [];
-  let data = {};
+  let allEvents = readData(id)?.event || [];
+  let data = { SYNC_TOKEN_KEY: "", event: [] };
   let pageToken;
+  const SYNC_TOKEN_KEY = readData(id)?.SYNC_TOKEN_KEY || undefined;
   do {
     const res = await calendar.events.list({
       calendarId: id,
+      syncToken: SYNC_TOKEN_KEY,
+      pageToken: pageToken,
       // timeMin: start.toISOString(),
       // timeMax: end.toISOString(),
-      singleEvents: true,
-      orderBy: "startTime",
+      // singleEvents: true,
+      // orderBy: "startTime",
     });
     const events = res.data.items;
     allEvents.push(...events);
     pageToken = res.data.nextPageToken;
-    data[id].SYNC_TOKEN_KEY = res.data.nextSyncToken;
+    data["SYNC_TOKEN_KEY"] = res.data.nextSyncToken || data.SYNC_TOKEN_KEY;
   } while (pageToken);
-  console.log(data[id]);
-  data[id] = allEvents;
-  writeData("calendar", data);
+  data["event"] = allEvents;
+  writeData(id, data);
+  return allEvents;
 }
-
-function synchronize(auth) {}
 
 module.exports = {
   authorize,
   calendarList,
   getAllEvents,
   listEvents,
-  initalSync,
+  synchronize,
 };
