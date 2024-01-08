@@ -237,3 +237,10 @@ button {
 .setting-label {
   margin-left: 10px;
 }
+
+.box {
+  display: flex;
+  padding-inline: 10px;
+  flex-direction: column;
+  padding-bottom: 10px;
+}

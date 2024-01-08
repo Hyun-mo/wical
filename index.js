@@ -18,6 +18,7 @@ async function createWindow(config) {
     },
     titleBarStyle: "customButtonsOnHover",
     frame: false,
+    resizable: false,
   });
   if (isDev) win.webContents.openDevTools();
   win.loadFile(path.join(__dirname, "src/pages/main/main.html"));
@@ -70,7 +71,6 @@ ipcMain.handle("google-get-calendar-event", async (_, { start, end }) => {
       .filter((key) => calendar.activeCalendarList[key])
       .map(async (id) => await google.synchronize(auth, start, end, id))
   );
-
   return event_to_hash([].concat(...result));
 });
 
@@ -86,9 +86,10 @@ ipcMain.handle("google-get-calendar-list", async (_) => {
  * @returns {Object} hash object of calendar event
  */
 function event_to_hash(events) {
+  const result = {};
   try {
-    const result = {};
     events.forEach((v, i) => {
+      if (!v.start) return;
       const start = new Date(v.start.date || v.start.dateTime).getTime();
       const end = new Date(v.end.date || v.end.dateTime).getTime();
       let day = 1000 * 60 * 60 * 24;
@@ -102,9 +103,10 @@ function event_to_hash(events) {
         t += day;
       }
     });
-    return result;
   } catch (err) {
     console.log(err);
+  } finally {
+    return result;
   }
 }
 

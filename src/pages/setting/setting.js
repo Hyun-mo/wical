@@ -8,6 +8,8 @@ function init() {
     .getElementsByClassName("setting-done")[0]
     .addEventListener("click", (e) => {
       e.preventDefault();
+      const body = document.getElementsByTagName("body");
+      body[0].innerHTML = "";
       console.log(config);
       IpcRenderer.invoke("use-config-storage", config);
       IpcRenderer.invoke("goto", {
@@ -42,11 +44,8 @@ function init() {
   });
   IpcRenderer.invoke("use-calendar-storage").then((result) => {
     const calendar = result;
-    const Account = document.getElementById("account");
-    Account.className = "head-line";
-    const p = document.createElement("p");
+    const p = document.getElementById("account");
     p.innerText = calendar.calendarList.find((item) => item.primary).id;
-    Account.append(p);
     const CalendarList = document.getElementById("calendar-list");
     calendar.calendarList.forEach((account) => {
       const p = document.createElement("p");

@@ -10,12 +10,19 @@
   </head>
   <body>
     <div class="titlebar"></div>
-    <div class="head-line">
-      <p>General</p>
+    <div class="box">
+      <div class="head-line">
+        <p>General</p>
+      </div>
+      <form class="general"></form>
     </div>
-    <form class="general"></form>
-    <div class="head-line" id="account"></div>
-    <form class="general" id="calendar-list"></form>
+    <div class="box">
+      <div class="head-line">Calendar</div>
+      <div class="box">
+        <p id="account"></p>
+        <form class="general" id="calendar-list"></form>
+      </div>
+    </div>
     <button><a class="setting-done" href="../main/main.html">완료</a></button>
   </body>
 </html>

@@ -21,7 +21,6 @@ function parseData() {
       general: {
         startingApp: false,
         onlyCalendar: true,
-        resizable: true,
         todayMark: true,
       },
       language: "ko",

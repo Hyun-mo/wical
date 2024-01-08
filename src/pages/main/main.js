@@ -18,6 +18,8 @@ function init() {
   });
   const Setting = document.getElementById("setting-btn");
   Setting.addEventListener("click", () => {
+    const body = document.getElementsByTagName("body");
+    body[0].innerHTML = "";
     IpcRenderer.invoke("goto", {
       URL: path.join(__dirname, "../setting/setting.html"),
       config: undefined,
