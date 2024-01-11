@@ -9,8 +9,8 @@ let win;
 async function createWindow(config) {
   win = new BrowserWindow({
     transparent: true,
-    width: isDev ? 900 : 240,
-    height: config.general.onlyCalendar ? 300 : 500,
+    width: 240,
+    height: 500,
     webPreferences: {
       // preload: path.join(__dirname, "src", "preload.js"),
       contextIsolation: false,
@@ -18,7 +18,7 @@ async function createWindow(config) {
     },
     titleBarStyle: "customButtonsOnHover",
     frame: false,
-    resizable: false,
+    resizable: isDev,
   });
   if (isDev) win.webContents.openDevTools();
   win.loadFile(path.join(__dirname, "src/pages/main/main.html"));
@@ -42,12 +42,12 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.handle("goto", (_, { URL, config }) => {
-  win.setSize(
-    isDev ? 900 : 240,
-    config?.general.onlyCalendar ? 300 : 500,
-    true
-  );
+  win.setSize(240, config?.general.onlyCalendar ? 300 : 500, true);
   win.loadFile(URL);
+});
+
+ipcMain.handle("set-window-size", (_, height) => {
+  win.setSize(240, height);
 });
 
 ipcMain.handle("use-config-storage", async (_, value) => {

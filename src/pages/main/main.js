@@ -7,6 +7,8 @@ let events = {};
 let config;
 let calendar;
 function init() {
+  const app = document.getElementById("app");
+  IpcRenderer.invoke("set-window-size", app.offsetHeight);
   let now_month = 0;
   getGoogleCalendar(new Date());
   const Arrow = document.getElementsByClassName("head-line")[0];
@@ -139,7 +141,6 @@ function getGoogleCalendar(month) {
  * @param {Date} date
  */
 function ShowNextSchedule(date) {
-  if (config.general.onlyCalendar) return;
   const days = Array.from({ length: 7 }, (_, i) => i);
   const Schedule = document.getElementById("schedule");
   const color = {};
@@ -187,6 +188,10 @@ function ShowNextSchedule(date) {
       });
     }
   });
+  if (event_set.size) Schedule.style.display = "block";
+  else Schedule.style.display = "none";
+  const app = document.getElementById("app");
+  IpcRenderer.invoke("set-window-size", app.offsetHeight);
 }
 
 init();
