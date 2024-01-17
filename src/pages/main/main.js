@@ -18,15 +18,7 @@ function init() {
     else return;
     calRender(now_month, config.language);
   });
-  const Setting = document.getElementById("setting-btn");
-  Setting.addEventListener("click", () => {
-    const body = document.getElementsByTagName("body");
-    body[0].innerHTML = "";
-    IpcRenderer.invoke("goto", {
-      URL: path.join(__dirname, "../setting/setting.html"),
-      config: undefined,
-    });
-  });
+
   document.getElementById("calendar").addEventListener("click", (e) => {
     if (e.target.classList.contains("date")) {
       const prev = document.getElementsByClassName("selected");
@@ -46,8 +38,12 @@ function init() {
   IpcRenderer.invoke("use-config-storage").then((result) => {
     config = result;
     calRender(0, config.language);
-    const NextSchedule = document.getElementsByClassName("next-schedule")[0];
-    if (!config.general.onlyCalendar) NextSchedule.classList.remove("hidden");
+    document.getElementsByTagName("body")[0].style.backgroundColor = `rgba(
+      50,
+      50,
+      50,
+      ${config.opacity}
+    )`;
   });
 }
 
@@ -59,7 +55,6 @@ function calRender(now_month, lang) {
   const this_month = month.getMonth();
   const Month = document.getElementById("month");
   Month.innerText = i18n_month[lang][month.getMonth()];
-  // if (lang === "en") Month.style.width = "11rem";
   const Calendar = document.getElementById("calendar");
   Calendar.innerHTML = "";
   for (const day of i18n_days[lang]) {
@@ -68,7 +63,6 @@ function calRender(now_month, lang) {
     el.innerText = day;
     Calendar.appendChild(el);
   }
-
   const date = new Date(month.getFullYear(), month.getMonth(), -month.getDay());
   for (let i = 0; i < 42; i++) {
     date.setDate(date.getDate() + 1);
@@ -91,10 +85,7 @@ function calRender(now_month, lang) {
       el.id = date;
     }
     if (!events) return;
-    const color = {};
-    calendar.calendarList.forEach((item) => {
-      color[item.id] = item.backgroundColor;
-    });
+
     const ev = events[Math.round(date.getTime() / ONE_DAY)];
     if (ev) {
       const dot_box = document.createElement("div");
@@ -102,9 +93,12 @@ function calRender(now_month, lang) {
       const max_account = 3;
       const accounts = [...new Set(ev.map((e) => e.creator.email))];
       accounts.slice(0, max_account).forEach((account) => {
+        const color = calendar.calendar_list.find(
+          (e) => e.id === account
+        ).backgroundColor;
         const dot = document.createElement("span");
         dot.className = "dot";
-        dot.style.backgroundColor = color[account];
+        dot.style.backgroundColor = color;
         dot_box.appendChild(dot);
         el.appendChild(dot_box);
       });
@@ -138,10 +132,6 @@ function getGoogleCalendar(month) {
 function ShowNextSchedule(date) {
   const Schedule = document.getElementById("schedule");
   Schedule.innerHTML = "";
-  const color = {};
-  calendar.calendarList.forEach((item) => {
-    color[item.id] = item.backgroundColor;
-  });
   const days = Array.from({ length: 7 }, (_, i) => i);
   const event_set = new Set();
   if (date)
@@ -166,7 +156,10 @@ function ShowNextSchedule(date) {
           const div = document.createElement("div");
           div.className = "schedule";
           dot.className = "dot dot-big";
-          dot.style.backgroundColor = color[event.creator.email];
+          const color = calendar.calendar_list.find(
+            (e) => e.id === event.creator.email
+          ).backgroundColor;
+          dot.style.backgroundColor = color;
           p.innerText = event.summary;
           const end = new Date(event.end.date || event.end.dateTime);
           const start = new Date(event.start.date || event.start.dateTime);

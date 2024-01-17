@@ -6,6 +6,7 @@ body {
   background-color: rgba(50, 50, 50, 0.3);
   color: #e3e3e3;
   font-size: 1.6rem;
+  font-weight: bold;
   margin: 0;
   user-select: none;
   overflow: hidden;
@@ -24,16 +25,31 @@ input {
   background-color: transparent;
   border-radius: 0;
   margin: 0;
+  margin-inline: 5px;
 }
 button {
   cursor: pointer;
 }
+input[type="range"]:focus {
+  outline: none;
+}
+select {
+  background: transparent;
+  border: 0;
+  color: #e3e3e3;
+  font-size: 1.6rem;
+}
+div {
+  display: inherit;
+}
 .head-line {
   -webkit-app-region: drag;
-  font-size: 2rem;
+  font-size: 2.4rem;
   display: flex;
-  justify-content: center;
   padding-inline: 20px;
+  height: 3rem;
+  justify-content: space-between;
+  align-items: center;
 }
 
 #month {
@@ -108,8 +124,8 @@ button {
   grid-template-columns: repeat(7, 1fr);
   margin: auto;
   padding: 10px;
-  width: 22rem;
-  height: 22rem;
+  width: 24rem;
+  height: 24rem;
   border-radius: 1rem;
   align-items: center;
   justify-content: center;
@@ -167,9 +183,6 @@ button {
 
 .gear {
   -webkit-app-region: no-drag;
-  position: absolute;
-  right: 15px;
-  top: 2.2rem;
   width: 2rem;
   height: 2rem;
 }
@@ -193,11 +206,11 @@ button {
 }
 
 .left {
-  transform: translate(20%, -20%) rotate(135deg);
+  transform: translate(30%, -30%) rotate(135deg);
 }
 
 .right {
-  transform: translate(-20%, -20%) rotate(-45deg);
+  transform: translate(-30%, -30%) rotate(-45deg);
 }
 
 .next-schedule {
@@ -234,19 +247,18 @@ button {
   left: 5%;
 }
 
-.setting-check {
+.setting-text {
   padding: 5px;
   display: flex;
-  margin-left: 20px;
 }
 
 .setting-label {
-  margin-left: 10px;
+  margin-inline: 5px;
 }
 
 .box {
   display: flex;
   padding-inline: 10px;
   flex-direction: column;
-  padding-bottom: 10px;
+  padding-block: 10px;
 }

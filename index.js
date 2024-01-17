@@ -1,15 +1,19 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const { authorize, synchronize, calendarList } = require("./src/api/google");
-const { parseData, readData, writeData } = require("./src/api/loaclStorage");
+const { readData, writeData } = require("./src/api/loaclStorage");
 
+const appFolder = path.dirname(process.execPath);
+const updateExe = path.resolve(appFolder, "..", "Update.exe");
+const exeName = path.basename(process.execPath);
 const isDev = process.env.NODE_ENV === "development";
 let win;
+const width = 260;
 
 async function createWindow() {
   win = new BrowserWindow({
     transparent: true,
-    width: 240,
+    width: width,
     height: 500,
     webPreferences: {
       // preload: path.join(__dirname, "src", "preload.js"),
@@ -19,10 +23,21 @@ async function createWindow() {
     titleBarStyle: "customButtonsOnHover",
     frame: false,
     resizable: isDev,
+    // alwaysOnTop: true,
   });
   if (isDev) win.webContents.openDevTools();
   win.loadFile(path.join(__dirname, "src/pages/main/main.html"));
 }
+app.setLoginItemSettings({
+  openAtLogin: true,
+  path: updateExe,
+  args: [
+    "--processStart",
+    `"${exeName}"`,
+    "--process-start-args",
+    '"--hidden"',
+  ],
+});
 
 app.on("ready", () => {
   init();
@@ -40,13 +55,13 @@ app.on("window-all-closed", () => {
   }
 });
 
-ipcMain.handle("goto", (_, { URL, config }) => {
-  win.setSize(240, config?.general.onlyCalendar ? 300 : 500, true);
+ipcMain.handle("goto", (_, { URL }) => {
+  win.setSize(width, 300, true);
   win.loadFile(URL);
 });
 
 ipcMain.handle("set-window-size", (_, height) => {
-  win.setSize(240, height);
+  win.setSize(width, height);
 });
 
 ipcMain.handle("use-config-storage", async (_, value) => {
@@ -63,11 +78,10 @@ ipcMain.handle("google-get-calendar-event", async (_) => {
   const auth = await authorize();
   const calendar = readData("calendar");
   const active_calendar =
-    Object.keys(calendar.activeCalendarList) ||
-    (await calendarList(auth)).items;
+    Object.keys(calendar.active_calendar) || (await calendarList(auth)).items;
   const result = await Promise.all(
     active_calendar
-      .filter((key) => calendar.activeCalendarList[key])
+      .filter((key) => calendar.active_calendar[key])
       .map(async (id) => await synchronize(auth, id))
   );
   return event_to_hash([].concat(...result));
@@ -114,14 +128,14 @@ function init() {
   authorize()
     .then(calendarList)
     .then((calList) => {
-      calendar.calendarList = calList.items;
+      calendar.calendar_list = calList.items;
       calList.items.forEach((item) => {
-        if (!(item.id in calendar.activeCalendarList))
-          calendar.activeCalendarList[item.id] = true;
+        if (!(item.id in calendar.active_calendar))
+          calendar.active_calendar[item.id] = true;
       });
-      Object.keys(calendar.activeCalendarList).forEach((id) => {
+      Object.keys(calendar.active_calendar).forEach((id) => {
         if (!calList.items.find((item) => item.id === id))
-          delete calendar.activeCalendarList[id];
+          delete calendar.active_calendar[id];
       });
       writeData("calendar", calendar);
     });

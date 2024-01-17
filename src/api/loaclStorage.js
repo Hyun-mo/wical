@@ -17,15 +17,13 @@ function parseData(key) {
   const filePath = path.join(dataPath, key + ".json");
   const defaultData = {
     config: {
-      general: {
-        startingApp: false,
-        opacity: 1,
-      },
+      start_up: false,
       language: "ko",
+      opacity: 1,
     },
     calendar: {
-      calendarList: [],
-      activeCalendarList: {},
+      calendar_list: [],
+      active_calendar: {},
     },
   };
   try {

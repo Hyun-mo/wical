@@ -9,20 +9,43 @@
     <title>Settings</title>
   </head>
   <body>
-    <div class="titlebar"></div>
-    <div class="box">
-      <div class="head-line">
-        <p>General</p>
-      </div>
-      <form class="general"></form>
-    </div>
-    <div class="box">
-      <div class="head-line">Calendar</div>
+    <div id="app">
+      <div class="titlebar"></div>
       <div class="box">
-        <p id="account"></p>
-        <form class="general" id="calendar-list"></form>
+        <div class="head-line">
+          <p>General</p>
+        </div>
+        <form class="general">
+          <p class="setting-text">
+            <input
+              type="checkbox"
+              value="start_up"
+              name="g[]"
+              id="start_up"
+            /><label for="start_up" class="setting-label">start up</label>
+          </p>
+          <p class="setting-text">
+            <label class="setting-label">opacity</label>
+            <input type="range" name="g[]" id="opacity" />
+          </p>
+          <p class="setting-text">
+            <label class="setting-label" for="language">language</label>
+            <select id="language">
+              <option value="ko">korean</option>
+              <option value="en">english</option>
+              <option value="ja">japanese</option>
+            </select>
+          </p>
+        </form>
       </div>
+      <div class="box">
+        <div class="head-line">Calendar</div>
+        <div class="box">
+          <p id="account"></p>
+          <form class="general" id="calendar-list"></form>
+        </div>
+      </div>
+      <button><a class="setting-done" href="../main/main.html">완료</a></button>
     </div>
-    <button><a class="setting-done" href="../main/main.html">완료</a></button>
   </body>
 </html>

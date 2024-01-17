@@ -12,20 +12,24 @@
     <div id="app">
       <div class="titlebar"></div>
       <div class="head-line">
-        <span>
-          <button class="arrow left"></button>
-        </span>
-        <span id="month">Month</span>
-        <span>
-          <button class="arrow right"></button>
-        </span>
-        <button class="gear" id="setting-btn">
+        <a class="gear"></a>
+        <div>
+          <span>
+            <button class="arrow left"></button>
+          </span>
+          <span id="month">Month</span>
+          <span>
+            <button class="arrow right"></button>
+          </span>
+        </div>
+
+        <a class="gear" id="setting-btn" href="../setting/setting.html">
           <img
             class="hidden"
             src="../../../assest/gear.svg"
             style="width: 20px"
           />
-        </button>
+        </a>
       </div>
       <div class="calendar" id="calendar"></div>
       <div class="next-schedule hidden" id="schedule">
