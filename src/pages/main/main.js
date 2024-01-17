@@ -59,7 +59,7 @@ function calRender(now_month, lang) {
   const this_month = month.getMonth();
   const Month = document.getElementById("month");
   Month.innerText = i18n_month[lang][month.getMonth()];
-  if (lang === "en") Month.style.width = "11rem";
+  // if (lang === "en") Month.style.width = "11rem";
   const Calendar = document.getElementById("calendar");
   Calendar.innerHTML = "";
   for (const day of i18n_days[lang]) {
