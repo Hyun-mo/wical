@@ -2,6 +2,7 @@
 const IpcRenderer = require("electron").ipcRenderer;
 const path = require("path");
 let config;
+let calendar;
 function init() {
   const General = document.getElementsByClassName("general")[0];
   document
@@ -9,9 +10,11 @@ function init() {
     .addEventListener("click", (e) => {
       e.preventDefault();
       const body = document.getElementsByTagName("body");
-      body[0].innerHTML = "";
+      // body[0].innerHTML = "";
       console.log(config);
+      console.log(calendar);
       IpcRenderer.invoke("use-config-storage", config);
+      IpcRenderer.invoke("use-calendar-storage", calendar);
       IpcRenderer.invoke("goto", {
         URL: path.join(__dirname, "../main/main.html"),
         config: config,
@@ -43,10 +46,11 @@ function init() {
     });
   });
   IpcRenderer.invoke("use-calendar-storage").then((result) => {
-    const calendar = result;
+    calendar = result;
     const p = document.getElementById("account");
     p.innerText = calendar.calendarList.find((item) => item.primary).id;
     const CalendarList = document.getElementById("calendar-list");
+    console.log(calendar);
     calendar.calendarList.forEach((account) => {
       const p = document.createElement("p");
       const label = document.createElement("label");
@@ -63,7 +67,7 @@ function init() {
         : account.summaryOverride || account.summary;
       label.setAttribute("for", account.primary ? "primary" : account.summary);
       input.onclick = (e) => {
-        calendar.activeCalendarList[calendar.id] = e.target.checked;
+        calendar.activeCalendarList[account.id] = e.target.checked;
       };
       p.appendChild(input);
       p.appendChild(label);

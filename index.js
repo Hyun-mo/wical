@@ -1,12 +1,12 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const google = require("./src/api/google");
+const { authorize, synchronize, calendarList } = require("./src/api/google");
 const { parseData, readData, writeData } = require("./src/api/loaclStorage");
 
 const isDev = process.env.NODE_ENV === "development";
 let win;
 
-async function createWindow(config) {
+async function createWindow() {
   win = new BrowserWindow({
     transparent: true,
     width: 240,
@@ -26,8 +26,7 @@ async function createWindow(config) {
 
 app.on("ready", () => {
   init();
-  const config = readData("config");
-  createWindow(config);
+  createWindow();
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -60,23 +59,23 @@ ipcMain.handle("use-calendar-storage", async (_, value) => {
   return readData("calendar");
 });
 
-ipcMain.handle("google-get-calendar-event", async (_, { start, end }) => {
-  const auth = await google.authorize();
+ipcMain.handle("google-get-calendar-event", async (_) => {
+  const auth = await authorize();
   const calendar = readData("calendar");
   const active_calendar =
     Object.keys(calendar.activeCalendarList) ||
-    (await google.calendarList(auth)).items;
+    (await calendarList(auth)).items;
   const result = await Promise.all(
     active_calendar
       .filter((key) => calendar.activeCalendarList[key])
-      .map(async (id) => await google.synchronize(auth, start, end, id))
+      .map(async (id) => await synchronize(auth, id))
   );
   return event_to_hash([].concat(...result));
 });
 
 ipcMain.handle("google-get-calendar-list", async (_) => {
-  const auth = await google.authorize();
-  const data = await google.calendarList(auth);
+  const auth = await authorize();
+  const data = await calendarList(auth);
   return data.items;
 });
 
@@ -112,9 +111,8 @@ function event_to_hash(events) {
 
 function init() {
   const calendar = readData("calendar");
-  google
-    .authorize()
-    .then(google.calendarList)
+  authorize()
+    .then(calendarList)
     .then((calList) => {
       calendar.calendarList = calList.items;
       calList.items.forEach((item) => {

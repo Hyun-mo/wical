@@ -147,8 +147,13 @@ async function calendarList(auth) {
 }
 
 // authorize().then(calendarList).catch(console.error);
-
-async function synchronize(auth, start, end, id) {
+/**
+ * Lists the next 10 events on the user's primary calendar.
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ * @param {string} id calendar id.
+ * @returns {calendar_v3.Schema$Event[]}
+ */
+async function synchronize(auth, id) {
   const calendar = google.calendar({ version: "v3", auth });
   let allEvents = readData(id)?.event || [];
   let data = { SYNC_TOKEN_KEY: "", event: [] };
@@ -161,7 +166,7 @@ async function synchronize(auth, start, end, id) {
       pageToken: pageToken,
       // timeMin: start.toISOString(),
       // timeMax: end.toISOString(),
-      // singleEvents: true,
+      singleEvents: true,
       // orderBy: "startTime",
     });
     const events = res.data.items;
@@ -177,7 +182,5 @@ async function synchronize(auth, start, end, id) {
 module.exports = {
   authorize,
   calendarList,
-  getAllEvents,
-  listEvents,
   synchronize,
 };

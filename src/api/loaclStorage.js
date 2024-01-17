@@ -2,26 +2,24 @@ const fs = require("fs");
 const path = require("path");
 const { app } = require("electron");
 const dataPath = app.getPath("userData");
-const filePath = path.join(dataPath, "config.json");
 
 function writeData(key, value) {
-  let contents = parseData();
-  contents[key] = value;
-  fs.writeFileSync(filePath, JSON.stringify(contents));
+  const filePath = path.join(dataPath, key + ".json");
+  fs.writeFileSync(filePath, JSON.stringify(value));
 }
 
 function readData(key) {
-  let contents = parseData();
-  return contents[key];
+  let contents = parseData(key);
+  return contents;
 }
 
-function parseData() {
+function parseData(key) {
+  const filePath = path.join(dataPath, key + ".json");
   const defaultData = {
     config: {
       general: {
         startingApp: false,
-        onlyCalendar: true,
-        todayMark: true,
+        opacity: 1,
       },
       language: "ko",
     },
@@ -35,8 +33,10 @@ function parseData() {
     return data;
   } catch (error) {
     if (!fs.existsSync(filePath))
-      fs.writeFileSync(filePath, JSON.stringify(defaultData));
-    return defaultData;
+      if (key in defaultData)
+        fs.writeFileSync(filePath, JSON.stringify(defaultData[key]));
+      else fs.writeFileSync(filePath, "");
+    return defaultData[key];
   }
 }
 

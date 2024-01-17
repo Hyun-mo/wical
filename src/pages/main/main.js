@@ -32,7 +32,7 @@ function init() {
       const prev = document.getElementsByClassName("selected");
       if (e.target.classList.contains("selected")) {
         e.target.classList.remove("selected");
-        ShowNextSchedule(new Date());
+        ShowNextSchedule();
       } else {
         if (prev.length) prev[0].classList.remove("selected");
         e.target.classList.add("selected");
@@ -82,11 +82,7 @@ function calRender(now_month, lang) {
       el.className = "date";
       el.innerText = date.getDate();
       el.id = date;
-      if (
-        config.general.todayMark &&
-        date.getDate() === now.getDate() &&
-        now_month === 0
-      ) {
+      if (date.getDate() === now.getDate() && now_month === 0) {
         el.className = "date today";
       }
     } else {
@@ -115,7 +111,6 @@ function calRender(now_month, lang) {
     }
     Calendar.appendChild(el);
   }
-  ShowNextSchedule(new Date());
 }
 
 /**
@@ -141,53 +136,60 @@ function getGoogleCalendar(month) {
  * @param {Date} date
  */
 function ShowNextSchedule(date) {
-  const days = Array.from({ length: 7 }, (_, i) => i);
   const Schedule = document.getElementById("schedule");
+  Schedule.innerHTML = "";
   const color = {};
   calendar.calendarList.forEach((item) => {
     color[item.id] = item.backgroundColor;
   });
-  Schedule.innerHTML = "";
+  const days = Array.from({ length: 7 }, (_, i) => i);
   const event_set = new Set();
-  days.map((i) => {
-    const schedule = events[Math.round(date.getTime() / ONE_DAY)];
-    date.setDate(date.getDate() + 1);
-    if (!schedule) return;
-    const event_list = schedule.filter((e) => !event_set.has(e.id));
-    if (event_list.length) {
-      const line = document.createElement("div");
-      line.className = "division-line";
-      Schedule.appendChild(line);
-      const day = document.createElement("p");
-      day.className = "schedule-day";
-      day.innerText = i18n_full_days[config.language][(date.getDay() + 6) % 7];
-      Schedule.appendChild(day);
-      event_list.forEach((event) => {
-        event_set.add(event.id);
-        const p = document.createElement("p");
-        const dot = document.createElement("span");
-        const div = document.createElement("div");
-        div.className = "schedule";
-        dot.className = "dot dot-big";
-        dot.style.backgroundColor = color[event.creator.email];
-        p.innerText = event.summary;
-        const end = new Date(event.end.date || event.end.dateTime);
-        const start = new Date(event.start.date || event.start.dateTime);
-        if (event.end.date) end.setDate(end.getDate() - 1);
-        if (
-          Math.round(end.getTime() / ONE_DAY) !==
-          Math.round(start.getTime() / ONE_DAY)
-        ) {
-          p.innerText +=
-            "(" + "~" + Number(end.getMonth() + 1) + "." + end.getDate() + ")";
-        }
+  if (date)
+    days.map((i) => {
+      const schedule = events[Math.round(date.getTime() / ONE_DAY)];
+      date.setDate(date.getDate() + 1);
+      if (!schedule) return;
+      const event_list = schedule.filter((e) => !event_set.has(e.id));
+      if (event_list.length) {
+        const line = document.createElement("div");
+        line.className = "division-line";
+        Schedule.appendChild(line);
+        const day = document.createElement("p");
+        day.className = "schedule-day";
+        day.innerText =
+          i18n_full_days[config.language][(date.getDay() + 6) % 7];
+        Schedule.appendChild(day);
+        event_list.forEach((event) => {
+          event_set.add(event.id);
+          const p = document.createElement("p");
+          const dot = document.createElement("span");
+          const div = document.createElement("div");
+          div.className = "schedule";
+          dot.className = "dot dot-big";
+          dot.style.backgroundColor = color[event.creator.email];
+          p.innerText = event.summary;
+          const end = new Date(event.end.date || event.end.dateTime);
+          const start = new Date(event.start.date || event.start.dateTime);
+          if (event.end.date) end.setDate(end.getDate() - 1);
+          if (
+            Math.round(end.getTime() / ONE_DAY) !==
+            Math.round(start.getTime() / ONE_DAY)
+          ) {
+            p.innerText +=
+              "(" +
+              "~" +
+              Number(end.getMonth() + 1) +
+              "." +
+              end.getDate() +
+              ")";
+          }
 
-        div.appendChild(dot);
-        div.appendChild(p);
-        Schedule.appendChild(div);
-      });
-    }
-  });
+          div.appendChild(dot);
+          div.appendChild(p);
+          Schedule.appendChild(div);
+        });
+      }
+    });
   if (event_set.size) Schedule.style.display = "block";
   else Schedule.style.display = "none";
   const app = document.getElementById("app");
