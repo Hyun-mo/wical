@@ -28,16 +28,19 @@ async function createWindow() {
   if (isDev) win.webContents.openDevTools();
   win.loadFile(path.join(__dirname, "src/pages/main/main.html"));
 }
-app.setLoginItemSettings({
-  openAtLogin: true,
-  path: updateExe,
-  args: [
-    "--processStart",
-    `"${exeName}"`,
-    "--process-start-args",
-    '"--hidden"',
-  ],
-});
+
+//launch at start
+
+// app.setLoginItemSettings({
+//   openAtLogin: true,
+//   path: updateExe,
+//   args: [
+//     "--processStart",
+//     `"${exeName}"`,
+//     "--process-start-args",
+//     '"--hidden"',
+//   ],
+// });
 
 app.on("ready", () => {
   init();
