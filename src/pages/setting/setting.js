@@ -18,7 +18,7 @@ function init() {
     document.getElementsByTagName("body")[0].style.backgroundColor = `rgba(
       50,
       50,
-      50,
+      60,
       ${config.opacity}
     )`;
     // start up
@@ -36,7 +36,7 @@ function init() {
       document.getElementsByTagName("body")[0].style.backgroundColor = `rgba(
         50,
         50,
-        50,
+        60,
         ${config.opacity}
       )`;
     };

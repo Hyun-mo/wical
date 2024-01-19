@@ -50,7 +50,7 @@ function init() {
     document.getElementsByTagName("body")[0].style.backgroundColor = `rgba(
       50,
       50,
-      50,
+      60,
       ${config.opacity}
     )`;
     console.log(config.alwaysOnTop);
@@ -126,7 +126,7 @@ function calRender(now_month, lang) {
       v.style.backgroundColor = `rgba(
           ${210 - config.opacity * 140},
           ${210 - config.opacity * 140},
-          ${210 - config.opacity * 140},
+          ${220 - config.opacity * 140},
           ${config.opacity + 0.1}
         )`;
     });
