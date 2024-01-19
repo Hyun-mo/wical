@@ -31,6 +31,15 @@ function init() {
       }
     }
   });
+  const $pin = document.getElementById("pin");
+  $pin.addEventListener("click", (e) => {
+    console.log(e.target);
+    config.alwaysOnTop = !config.alwaysOnTop;
+    IpcRenderer.invoke("set-always-on-top", config.alwaysOnTop);
+    if (config.alwaysOnTop) e.target.style.filter = "none";
+    else e.target.style.filter = "invert(0.5)";
+  });
+
   IpcRenderer.invoke("use-calendar-storage").then((result) => {
     calendar = result;
   });
@@ -44,6 +53,11 @@ function init() {
       50,
       ${config.opacity}
     )`;
+    console.log(config.alwaysOnTop);
+    if (config.alwaysOnTop) {
+      $pin.style.filter = "none";
+      IpcRenderer.invoke("set-always-on-top", config.alwaysOnTop);
+    }
   });
 }
 

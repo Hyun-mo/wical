@@ -20,6 +20,7 @@ function parseData(key) {
       start_up: false,
       language: "ko",
       opacity: 1,
+      alwaysOnTop: false,
     },
     calendar: {
       calendar_list: [],

@@ -98,6 +98,9 @@ ipcMain.handle("google-get-calendar-list", async (_) => {
 
 ipcMain.handle("set-always-on-top", (_, param) => {
   win.setAlwaysOnTop(param);
+  const config = readData("config");
+  config.alwaysOnTop = param;
+  writeData("config", config);
 });
 
 /**

@@ -186,6 +186,11 @@ div {
   width: 2rem;
   height: 2rem;
 }
+.pin {
+  width: 2rem;
+  height: 2rem;
+  filter: invert(0.5);
+}
 
 .hidden {
   display: none;
