@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const { authorize, synchronize, calendarList } = require("./src/api/google");
-const { readData, writeData } = require("./src/api/loaclStorage");
+const { authorize, synchronize, calendarList } = require("./src/lib/google");
+const { readData, writeData } = require("./src/lib/loaclStorage");
 
 const appFolder = path.dirname(process.execPath);
 const updateExe = path.resolve(appFolder, "..", "Update.exe");
@@ -94,6 +94,10 @@ ipcMain.handle("google-get-calendar-list", async (_) => {
   const auth = await authorize();
   const data = await calendarList(auth);
   return data.items;
+});
+
+ipcMain.handle("set-always-on-top", (_, param) => {
+  win.setAlwaysOnTop(param);
 });
 
 /**
