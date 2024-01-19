@@ -1,6 +1,5 @@
 const IpcRenderer = require("electron").ipcRenderer;
 const { i18n_month, i18n_days, i18n_full_days } = require("../../../i18n");
-const path = require("path");
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
 let events = {};
@@ -38,6 +37,7 @@ function init() {
   IpcRenderer.invoke("use-config-storage").then((result) => {
     config = result;
     calRender(0, config.language);
+    console.log(config.opacity + 0.2);
     document.getElementsByTagName("body")[0].style.backgroundColor = `rgba(
       50,
       50,
@@ -105,6 +105,17 @@ function calRender(now_month, lang) {
     }
     Calendar.appendChild(el);
   }
+  document
+    .getElementById("calendar")
+    .querySelectorAll("span:nth-child(7n + 8), span:nth-child(7n + 14)")
+    .forEach((v) => {
+      v.style.backgroundColor = `rgba(
+          ${210 - config.opacity * 140},
+          ${210 - config.opacity * 140},
+          ${210 - config.opacity * 140},
+          ${config.opacity + 0.1}
+        )`;
+    });
 }
 
 /**
