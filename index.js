@@ -29,19 +29,6 @@ async function createWindow() {
   win.loadFile(path.join(__dirname, "src/pages/main/main.html"));
 }
 
-//launch at start
-
-// app.setLoginItemSettings({
-//   openAtLogin: true,
-//   path: updateExe,
-//   args: [
-//     "--processStart",
-//     `"${exeName}"`,
-//     "--process-start-args",
-//     '"--hidden"',
-//   ],
-// });
-
 app.on("ready", () => {
   init();
   createWindow();
@@ -135,6 +122,7 @@ function event_to_hash(events) {
 
 function init() {
   const calendar = readData("calendar");
+  const config = readData("config");
   authorize()
     .then(calendarList)
     .then((calList) => {
@@ -149,4 +137,16 @@ function init() {
       });
       writeData("calendar", calendar);
     });
+
+  //launch at start
+  app.setLoginItemSettings({
+    openAtLogin: config.start_up,
+    path: updateExe,
+    args: [
+      "--processStart",
+      `"${exeName}"`,
+      "--process-start-args",
+      '"--hidden"',
+    ],
+  });
 }

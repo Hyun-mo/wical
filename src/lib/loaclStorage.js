@@ -18,9 +18,10 @@ function parseData(key) {
   const defaultData = {
     config: {
       start_up: false,
-      language: "ko",
+      language: "en",
       opacity: 1,
       alwaysOnTop: false,
+      theme: "system",
     },
     calendar: {
       calendar_list: [],

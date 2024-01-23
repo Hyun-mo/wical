@@ -1,6 +1,7 @@
 // import { IpcRenderer } from "electron";
 const IpcRenderer = require("electron").ipcRenderer;
-const path = require("path");
+const Theme = require("../../lib/theme");
+
 let config;
 let calendar;
 function init() {
@@ -15,12 +16,7 @@ function init() {
     });
   IpcRenderer.invoke("use-config-storage").then((result) => {
     config = result;
-    document.getElementsByTagName("body")[0].style.backgroundColor = `rgba(
-      50,
-      50,
-      60,
-      ${config.opacity}
-    )`;
+    Theme.apply(config.theme, config.opacity);
     // start up
     const start_up = document.getElementById("start_up");
     start_up.checked = config.start_up;
@@ -33,12 +29,7 @@ function init() {
     opacity.value = config.opacity * 100;
     opacity.onchange = (e) => {
       config.opacity = e.target.value / 100;
-      document.getElementsByTagName("body")[0].style.backgroundColor = `rgba(
-        50,
-        50,
-        60,
-        ${config.opacity}
-      )`;
+      Theme.apply(config.theme, config.opacity);
     };
 
     //language
@@ -48,6 +39,15 @@ function init() {
     }
     language.onchange = (e) => {
       config.language = e.target.value;
+    };
+    //theme
+    const theme = document.getElementById("theme");
+    for (const e of theme) {
+      if (e.value === config.theme) e.setAttribute("selected", "selected");
+    }
+    theme.onchange = (e) => {
+      config.theme = e.target.value;
+      Theme.apply(config.theme, config.opacity);
     };
   });
   IpcRenderer.invoke("use-calendar-storage").then((result) => {

@@ -10,13 +10,13 @@
   </head>
   <body>
     <div id="app">
-      <div class="titlebar"></div>
+      <div class="frame"></div>
+      <div class="title">
+        <p>General</p>
+      </div>
       <div class="box">
-        <div class="head-line">
-          <p>General</p>
-        </div>
         <form class="general">
-          <p class="setting-text">
+          <p class="text">
             <input
               type="checkbox"
               value="start_up"
@@ -24,11 +24,19 @@
               id="start_up"
             /><label for="start_up" class="setting-label">start up</label>
           </p>
-          <p class="setting-text">
+          <p class="text">
             <label class="setting-label">opacity</label>
             <input type="range" name="g[]" id="opacity" />
           </p>
-          <p class="setting-text">
+          <p class="text">
+            <label class="setting-label" for="theme">theme</label>
+            <select id="theme">
+              <option value="system">system</option>
+              <option value="dark">dark</option>
+              <option value="light">light</option>
+            </select>
+          </p>
+          <p class="text">
             <label class="setting-label" for="language">language</label>
             <select id="language">
               <option value="ko">korean</option>
@@ -38,14 +46,12 @@
           </p>
         </form>
       </div>
+      <div class="title">Calendar</div>
       <div class="box">
-        <div class="head-line">Calendar</div>
-        <div class="box">
-          <p id="account"></p>
-          <form class="general" id="calendar-list"></form>
-        </div>
+        <p id="account"></p>
+        <form class="general" id="calendar-list"></form>
       </div>
-      <button><a class="setting-done" href="../main/main.html">완료</a></button>
     </div>
+    <button><a class="setting-done" href="../main/main.html">완료</a></button>
   </body>
 </html>

@@ -1,4 +1,5 @@
-const i18n_language_list = ["ko", "en", "ja"];
+// const i18n_language_list = ["ko", "en", "ja"];
+
 const i18n_month = {
   ko: Array.from({ length: 12 }, (_, i) => Number(i + 1) + "월"),
   en: [
@@ -38,5 +39,4 @@ const i18n_full_days = {
   ja: ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"],
 };
 
-module.exports = { i18n_language_list, i18n_month, i18n_days, i18n_full_days };
-// export { i18n_language_list, i18n_month, i18n_days };
+module.exports = { i18n_month, i18n_days, i18n_full_days };

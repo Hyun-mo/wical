@@ -10,27 +10,27 @@
   </head>
   <body>
     <div id="app">
-      <div class="titlebar"></div>
-      <div class="head-line">
-        <div class="gear">
+      <div class="frame"></div>
+      <div class="header">
+        <button class="icon">
           <img
             src="../../../assest/pushpin-icon.svg"
-            class="hidden pin"
+            class="hidden icon"
             id="pin"
           />
-        </div>
+        </button>
         <div>
           <span>
             <button class="arrow left"></button>
           </span>
-          <span id="month">Month</span>
+          <span class="title" id="month">Month</span>
           <span>
             <button class="arrow right"></button>
           </span>
         </div>
 
-        <a class="gear" id="setting-btn" href="../setting/setting.html">
-          <img class="hidden gear" src="../../../assest/gear.svg" />
+        <a class="icon" id="setting-btn" href="../setting/setting.html">
+          <img class="hidden icon" src="../../../assest/settings.svg" />
         </a>
       </div>
       <div class="calendar" id="calendar"></div>

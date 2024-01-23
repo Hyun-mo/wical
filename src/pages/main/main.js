@@ -1,5 +1,6 @@
 const IpcRenderer = require("electron").ipcRenderer;
-const { i18n_month, i18n_days, i18n_full_days } = require("../../../i18n");
+const { i18n_month, i18n_days, i18n_full_days } = require("../../lib/i18n");
+const Theme = require("../../lib/theme");
 const ONE_DAY = 1000 * 60 * 60 * 24;
 
 let events = {};
@@ -10,7 +11,7 @@ function init() {
   IpcRenderer.invoke("set-window-size", app.offsetHeight);
   let now_month = 0;
   getGoogleCalendar(new Date());
-  const Arrow = document.getElementsByClassName("head-line")[0];
+  const Arrow = document.getElementsByClassName("header")[0];
   Arrow.addEventListener("click", (e) => {
     if (e.target.classList.contains("left")) now_month -= 1;
     else if (e.target.classList.contains("right")) now_month += 1;
@@ -20,13 +21,13 @@ function init() {
 
   document.getElementById("calendar").addEventListener("click", (e) => {
     if (e.target.classList.contains("date")) {
-      const prev = document.getElementsByClassName("selected");
-      if (e.target.classList.contains("selected")) {
-        e.target.classList.remove("selected");
+      const prev = document.getElementsByClassName("date-selected");
+      if (e.target.classList.contains("date-selected")) {
+        e.target.classList.remove("date-selected");
         ShowNextSchedule();
       } else {
-        if (prev.length) prev[0].classList.remove("selected");
-        e.target.classList.add("selected");
+        if (prev.length) prev[0].classList.remove("date-selected");
+        e.target.classList.add("date-selected");
         ShowNextSchedule(new Date(e.target.id));
       }
     }
@@ -46,14 +47,7 @@ function init() {
   IpcRenderer.invoke("use-config-storage").then((result) => {
     config = result;
     calRender(0, config.language);
-    console.log(config.opacity + 0.2);
-    document.getElementsByTagName("body")[0].style.backgroundColor = `rgba(
-      50,
-      50,
-      60,
-      ${config.opacity}
-    )`;
-    console.log(config.alwaysOnTop);
+    Theme.apply(config.theme, config.opacity);
     if (config.alwaysOnTop) {
       $pin.style.filter = "none";
       IpcRenderer.invoke("set-always-on-top", config.alwaysOnTop);
@@ -119,16 +113,17 @@ function calRender(now_month, lang) {
     }
     Calendar.appendChild(el);
   }
+  let theme = config.theme;
+  if (config.theme === "system") {
+    theme = window.matchMedia("(prefers-color-scheme: dark)")
+      ? "dark"
+      : "light";
+  }
   document
     .getElementById("calendar")
     .querySelectorAll("span:nth-child(7n + 8), span:nth-child(7n + 14)")
     .forEach((v) => {
-      v.style.backgroundColor = `rgba(
-          ${210 - config.opacity * 140},
-          ${210 - config.opacity * 140},
-          ${220 - config.opacity * 140},
-          ${config.opacity + 0.1}
-        )`;
+      v.style.backgroundColor = Theme.blur_box[theme](config.opacity);
     });
 }
 
@@ -170,7 +165,7 @@ function ShowNextSchedule(date) {
         line.className = "division-line";
         Schedule.appendChild(line);
         const day = document.createElement("p");
-        day.className = "schedule-day";
+        day.className = "text bold";
         day.innerText =
           i18n_full_days[config.language][(date.getDay() + 6) % 7];
         Schedule.appendChild(day);
