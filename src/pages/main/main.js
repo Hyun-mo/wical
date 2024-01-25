@@ -34,7 +34,6 @@ function init() {
   });
   const $pin = document.getElementById("pin");
   $pin.addEventListener("click", (e) => {
-    console.log(e.target);
     config.alwaysOnTop = !config.alwaysOnTop;
     IpcRenderer.invoke("set-always-on-top", config.alwaysOnTop);
     if (config.alwaysOnTop) e.target.style.filter = "none";
@@ -62,6 +61,7 @@ function calRender(now_month, lang) {
   month.setMonth(month.getMonth() + now_month);
   const this_month = month.getMonth();
   const Month = document.getElementById("month");
+  Month.style.width = displayTextWidth(lang);
   Month.innerText = i18n_month[lang][month.getMonth()];
   const Calendar = document.getElementById("calendar");
   Calendar.innerHTML = "";
@@ -210,3 +210,18 @@ function ShowNextSchedule(date) {
 }
 
 init();
+
+function displayTextWidth(lang) {
+  const month = document.getElementById("month");
+  const font = getComputedStyle(month).fontFamily.split(", ")[0];
+  const canvas =
+    displayTextWidth.canvas ||
+    (displayTextWidth.canvas = document.createElement("canvas"));
+  const context = canvas.getContext("2d");
+  context.font = `2.4rem ${font}`;
+  console.log(context);
+  const metrics = i18n_month[lang].map((v) => context.measureText(v));
+  const max_width = Math.max(...metrics.map((v) => v.width));
+  console.log(max_width);
+  return Math.ceil(max_width) + "px";
+}

@@ -2,6 +2,7 @@ html {
   font-size: 62.5%;
   background: rgba(0, 0, 0, 0);
 }
+
 body {
   background-color: rgba(50, 50, 70, 0.3);
   color: #e3e3e3;
@@ -9,6 +10,9 @@ body {
   margin: 0;
   user-select: none;
   overflow: hidden;
+  font-family: "Nanum Gothic", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 a {
   text-decoration: none;
@@ -73,7 +77,6 @@ div {
 .title {
   font-size: 2.4rem;
   display: flex;
-  padding-inline: 20px;
   height: 3rem;
   justify-content: center;
   align-items: center;
@@ -91,13 +94,13 @@ div {
 #month {
   display: flex;
   justify-content: center;
-  padding-inline: 5px;
 }
 
 .icon {
   -webkit-app-region: no-drag;
   width: 2rem;
-  height: 2rem;
+  height: 100%;
+  margin: 0;
 }
 
 .arrow {
@@ -107,6 +110,7 @@ div {
   height: 1.4rem;
   width: 1.4rem;
   border-radius: 2px;
+  padding: 2px;
 }
 
 .arrow.left {

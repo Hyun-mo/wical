@@ -12,9 +12,9 @@ const backgroud = {
     ${opacity}
   )`,
   light: (opacity) => `rgba(
-    220,
-    220,
-    230,
+    242,
+    240,
+    240,
     ${opacity}
   )`,
 };
@@ -28,7 +28,7 @@ const blur_box = {
   light: (opacity) => `rgba(
     ${205 + opacity * 50},
     ${205 + opacity * 50},
-    ${215 + opacity * 50},
+    ${205 + opacity * 50},
     ${opacity + 0.1}
   )`,
 };
