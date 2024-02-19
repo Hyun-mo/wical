@@ -22,6 +22,7 @@ function parseData(key) {
       opacity: 1,
       alwaysOnTop: false,
       theme: "system",
+      fontSize: "normal",
     },
     calendar: {
       calendar_list: [],

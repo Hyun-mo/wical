@@ -159,22 +159,44 @@ async function synchronize(auth, id) {
   let data = { SYNC_TOKEN_KEY: "", event: [] };
   let pageToken;
   const SYNC_TOKEN_KEY = readData(id)?.SYNC_TOKEN_KEY || undefined;
-  do {
-    const res = await calendar.events.list({
-      calendarId: id,
-      syncToken: SYNC_TOKEN_KEY,
-      pageToken: pageToken,
-      // timeMin: start.toISOString(),
-      // timeMax: end.toISOString(),
-      singleEvents: true,
-      // orderBy: "startTime",
-    });
-    const events = res.data.items;
-    allEvents.push(...events);
-    pageToken = res.data.nextPageToken;
-    data["SYNC_TOKEN_KEY"] = res.data.nextSyncToken || data.SYNC_TOKEN_KEY;
-  } while (pageToken);
-  data["event"] = allEvents;
+  try {
+    do {
+      const res = await calendar.events.list({
+        calendarId: id,
+        syncToken: SYNC_TOKEN_KEY,
+        pageToken: pageToken,
+        // timeMin: start.toISOString(),
+        // timeMax: end.toISOString(),
+        singleEvents: true,
+        // orderBy: "startTime",
+      });
+      const events = res.data.items;
+      allEvents.push(...events);
+      pageToken = res.data.nextPageToken;
+      data["SYNC_TOKEN_KEY"] = res.data.nextSyncToken || data.SYNC_TOKEN_KEY;
+    } while (pageToken);
+    data["event"] = allEvents;
+  } catch (e) {
+    console.log(e.errors[0].reason);
+    if (e.errors[0].reason === "fullSyncRequired") {
+      do {
+        const res = await calendar.events.list({
+          calendarId: id,
+          // syncToken: SYNC_TOKEN_KEY,
+          pageToken: pageToken,
+          // timeMin: start.toISOString(),
+          // timeMax: end.toISOString(),
+          singleEvents: true,
+          // orderBy: "startTime",
+        });
+        const events = res.data.items;
+        allEvents.push(...events);
+        pageToken = res.data.nextPageToken;
+        data["SYNC_TOKEN_KEY"] = res.data.nextSyncToken || data.SYNC_TOKEN_KEY;
+      } while (pageToken);
+      data["event"] = allEvents;
+    }
+  }
   writeData(id, data);
   return allEvents;
 }

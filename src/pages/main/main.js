@@ -7,6 +7,8 @@ let events = {};
 let config;
 let calendar;
 function init() {
+  // document.documentElement.style.fontSize = "18px";
+
   const app = document.getElementById("app");
   IpcRenderer.invoke("set-window-size", app.offsetHeight);
   let now_month = 0;
@@ -17,21 +19,9 @@ function init() {
     else if (e.target.classList.contains("right")) now_month += 1;
     else return;
     calRender(now_month, config.language);
+    ShowNextSchedule();
   });
 
-  document.getElementById("calendar").addEventListener("click", (e) => {
-    if (e.target.classList.contains("date")) {
-      const prev = document.getElementsByClassName("date-selected");
-      if (e.target.classList.contains("date-selected")) {
-        e.target.classList.remove("date-selected");
-        ShowNextSchedule();
-      } else {
-        if (prev.length) prev[0].classList.remove("date-selected");
-        e.target.classList.add("date-selected");
-        ShowNextSchedule(new Date(e.target.id));
-      }
-    }
-  });
   const $pin = document.getElementById("pin");
   $pin.addEventListener("click", (e) => {
     config.alwaysOnTop = !config.alwaysOnTop;
@@ -61,7 +51,7 @@ function calRender(now_month, lang) {
   month.setMonth(month.getMonth() + now_month);
   const this_month = month.getMonth();
   const Month = document.getElementById("month");
-  Month.style.width = displayTextWidth(lang);
+  // Month.style.width = displayTextWidth(lang);
   Month.innerText = i18n_month[lang][month.getMonth()];
   const Calendar = document.getElementById("calendar");
   Calendar.innerHTML = "";
@@ -77,27 +67,21 @@ function calRender(now_month, lang) {
     const mm = date.getMonth();
     const el = document.createElement("span");
     if (mm < this_month) {
-      el.className = "date-prev date";
-      el.innerText = date.getDate();
-      el.id = date;
-    } else if (mm === this_month) {
-      el.className = "date";
-      el.innerText = date.getDate();
-      el.id = date;
-      if (date.getDate() === now.getDate() && now_month === 0) {
-        el.className = "date today";
-      }
-    } else {
-      el.className = "date-next date";
-      el.innerText = date.getDate();
-      el.id = date;
+      el.className = "date-prev";
+    } else if (mm > this_month) {
+      el.className = "date-next";
     }
+    if (date.getDate() === now.getDate() && now_month === 0) {
+      el.classList.add("today");
+    }
+    el.classList.add("date");
+    el.innerText = date.getDate();
     if (!events) return;
 
+    const dot_box = document.createElement("div");
+    dot_box.className = "dot-box";
     const ev = events[Math.round(date.getTime() / ONE_DAY)];
     if (ev) {
-      const dot_box = document.createElement("div");
-      dot_box.className = "dot-box";
       const max_account = 3;
       const accounts = [...new Set(ev.map((e) => e.creator.email))];
       accounts.slice(0, max_account).forEach((account) => {
@@ -108,11 +92,26 @@ function calRender(now_month, lang) {
         dot.className = "dot";
         dot.style.backgroundColor = color;
         dot_box.appendChild(dot);
-        el.appendChild(dot_box);
       });
     }
+    el.appendChild(dot_box);
+    const this_date = date.getTime();
+    el.addEventListener("click", (e) => {
+      if (el.classList.contains("date-selected")) {
+        el.classList.remove("date-selected");
+        ShowNextSchedule();
+      } else {
+        const prev = document.getElementsByClassName("date-selected");
+        if (prev.length) {
+          prev[0].classList.remove("date-selected");
+        }
+        el.classList.add("date-selected");
+        ShowNextSchedule(new Date(this_date));
+      }
+    });
     Calendar.appendChild(el);
   }
+
   let theme = config.theme;
   if (config.theme === "system") {
     theme = window.matchMedia("(prefers-color-scheme: dark)")
@@ -213,15 +212,15 @@ init();
 
 function displayTextWidth(lang) {
   const month = document.getElementById("month");
-  const font = getComputedStyle(month).fontFamily.split(", ")[0];
   const canvas =
     displayTextWidth.canvas ||
     (displayTextWidth.canvas = document.createElement("canvas"));
   const context = canvas.getContext("2d");
-  context.font = `2.4rem ${font}`;
-  console.log(context);
+  const font = getComputedStyle(month).fontFamily.split(", ")[0];
+  context.font = `1.5rem ${font}`;
+
   const metrics = i18n_month[lang].map((v) => context.measureText(v));
   const max_width = Math.max(...metrics.map((v) => v.width));
-  console.log(max_width);
+  console.log(metrics.map((v) => v.width));
   return Math.ceil(max_width) + "px";
 }
