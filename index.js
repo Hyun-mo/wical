@@ -20,6 +20,7 @@ async function createWindow() {
       contextIsolation: false,
       nodeIntegration: true,
     },
+    icon: path.join(__dirname, "assets/icon.icon.png"),
     titleBarStyle: "customButtonsOnHover",
     frame: false,
     resizable: isDev,
