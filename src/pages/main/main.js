@@ -70,9 +70,8 @@ function calRender(now_month, lang) {
       el.className = "date-prev";
     } else if (mm > this_month) {
       el.className = "date-next";
-    }
-    if (date.getDate() === now.getDate() && now_month === 0) {
-      el.classList.add("today");
+    } else if (date.getDate() === now.getDate() && now_month === 0) {
+      el.classList.add("date-selected");
     }
     el.classList.add("date");
     el.innerText = date.getDate();
@@ -205,22 +204,22 @@ function ShowNextSchedule(date) {
   if (event_set.size) Schedule.style.display = "block";
   else Schedule.style.display = "none";
   const app = document.getElementById("app");
-  IpcRenderer.invoke("set-window-size", app.offsetHeight);
+  IpcRenderer.invoke("set-window-size", app.offsetHeight + 5);
 }
 
 init();
 
-function displayTextWidth(lang) {
-  const month = document.getElementById("month");
-  const canvas =
-    displayTextWidth.canvas ||
-    (displayTextWidth.canvas = document.createElement("canvas"));
-  const context = canvas.getContext("2d");
-  const font = getComputedStyle(month).fontFamily.split(", ")[0];
-  context.font = `1.5rem ${font}`;
+// function displayTextWidth(lang) {
+//   const month = document.getElementById("month");
+//   const canvas =
+//     displayTextWidth.canvas ||
+//     (displayTextWidth.canvas = document.createElement("canvas"));
+//   const context = canvas.getContext("2d");
+//   const font = getComputedStyle(month).fontFamily.split(", ")[0];
+//   context.font = `1.5rem ${font}`;
 
-  const metrics = i18n_month[lang].map((v) => context.measureText(v));
-  const max_width = Math.max(...metrics.map((v) => v.width));
-  console.log(metrics.map((v) => v.width));
-  return Math.ceil(max_width) + "px";
-}
+//   const metrics = i18n_month[lang].map((v) => context.measureText(v));
+//   const max_width = Math.max(...metrics.map((v) => v.width));
+//   console.log(metrics.map((v) => v.width));
+//   return Math.ceil(max_width) + "px";
+// }

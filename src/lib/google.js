@@ -62,6 +62,7 @@ async function authorize() {
   });
   if (client.credentials) {
     await saveCredentials(client);
+    writeData("calendar", null);
   }
   return client;
 }
@@ -93,51 +94,6 @@ async function listEvents(auth, start, end, id = "primary") {
   return events;
 }
 
-/**
- * Lists the next 10 events on the user's primary calendar.
- * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- * @param {Date} start Date type
- * @param {Date} end Date type.
- * @returns {calendar_v3.Schema$Event[]}
- */
-async function getAllEvents(auth, start, end, id = "primary") {
-  try {
-    console.log(id);
-    const calendar = google.calendar({ version: "v3", auth });
-    const allEvents = [];
-    let timeMin = new Date().toISOString();
-    while (1) {
-      console.log("get list");
-      const res = await calendar.events.list({
-        calendarId: id,
-        timeMin: start,
-        timeMax: end,
-        maxResults: 200,
-        singleEvents: true,
-        // orderBy: "startTime",
-      });
-      const events = res.data.items;
-      if (
-        !events ||
-        events.length === 0 ||
-        timeMin === events[events.length - 1].start.date ||
-        timeMin === events[events.length - 1].start.dateTime
-      ) {
-        console.log("No upcoming events found.");
-        break;
-      }
-      allEvents.push(...events);
-      console.log(allEvents.length);
-      timeMin =
-        events[events.length - 1].start.date ||
-        events[events.length - 1].start.dateTime;
-    }
-    return allEvents;
-  } catch (err) {
-    console.log(id);
-  }
-}
-
 //get calendar id
 async function calendarList(auth) {
   const calendar = google.calendar({ version: "v3", auth });
@@ -154,31 +110,33 @@ async function calendarList(auth) {
  * @returns {calendar_v3.Schema$Event[]}
  */
 async function synchronize(auth, id) {
+  console.log(id);
   const calendar = google.calendar({ version: "v3", auth });
-  let allEvents = readData(id)?.event || [];
-  let data = { SYNC_TOKEN_KEY: "", event: [] };
+  const calendarDB = readData("calendar");
+  if (!(id in calendarDB))
+    calendarDB[id] = { event: [], SYNC_TOKEN_KEY: undefined };
   let pageToken;
-  const SYNC_TOKEN_KEY = readData(id)?.SYNC_TOKEN_KEY || undefined;
   try {
     do {
       const res = await calendar.events.list({
         calendarId: id,
-        syncToken: SYNC_TOKEN_KEY,
+        syncToken: calendarDB[id].SYNC_TOKEN_KEY || undefined,
         pageToken: pageToken,
         // timeMin: start.toISOString(),
         // timeMax: end.toISOString(),
         singleEvents: true,
         // orderBy: "startTime",
       });
-      const events = res.data.items;
-      allEvents.push(...events);
+      calendarDB[id].event.push(...res.data.items);
       pageToken = res.data.nextPageToken;
-      data["SYNC_TOKEN_KEY"] = res.data.nextSyncToken || data.SYNC_TOKEN_KEY;
+      calendarDB[id].SYNC_TOKEN_KEY =
+        res.data.nextSyncToken || calendarDB[id].SYNC_TOKEN_KEY;
     } while (pageToken);
-    data["event"] = allEvents;
   } catch (e) {
-    console.log(e.errors[0].reason);
+    console.error(e);
     if (e.errors[0].reason === "fullSyncRequired") {
+      calendarDB[id].event = [];
+      pageToken = undefined;
       do {
         const res = await calendar.events.list({
           calendarId: id,
@@ -189,16 +147,15 @@ async function synchronize(auth, id) {
           singleEvents: true,
           // orderBy: "startTime",
         });
-        const events = res.data.items;
-        allEvents.push(...events);
+        calendarDB[id].event.push(...res.data.items);
         pageToken = res.data.nextPageToken;
-        data["SYNC_TOKEN_KEY"] = res.data.nextSyncToken || data.SYNC_TOKEN_KEY;
+        calendarDB[id].SYNC_TOKEN_KEY =
+          res.data.nextSyncToken || calendarDB[id].SYNC_TOKEN_KEY;
       } while (pageToken);
-      data["event"] = allEvents;
     }
   }
-  writeData(id, data);
-  return allEvents;
+  writeData("calendar", calendarDB);
+  return calendarDB[id].event;
 }
 
 module.exports = {

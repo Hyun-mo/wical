@@ -67,12 +67,14 @@ ipcMain.handle("use-calendar-storage", async (_, value) => {
 
 ipcMain.handle("google-get-calendar-event", async (_) => {
   const auth = await authorize();
-  const calendar = readData("calendar");
-  const active_calendar =
-    Object.keys(calendar.active_calendar) || (await calendarList(auth)).items;
+  const calendarDB = readData("calendar");
+  const active_calendar = Object.keys(calendarDB.active_calendar || {});
+  if (!active_calendar) {
+    await init();
+  }
   const result = await Promise.all(
     active_calendar
-      .filter((key) => calendar.active_calendar[key])
+      .filter((key) => calendarDB.active_calendar[key])
       .map(async (id) => await synchronize(auth, id))
   );
   return event_to_hash([].concat(...result));
@@ -121,23 +123,21 @@ function event_to_hash(events) {
   }
 }
 
-function init() {
-  const calendar = readData("calendar");
+async function init() {
+  const calendarDB = readData("calendar");
   const config = readData("config");
-  authorize()
-    .then(calendarList)
-    .then((calList) => {
-      calendar.calendar_list = calList.items;
-      calList.items.forEach((item) => {
-        if (!(item.id in calendar.active_calendar))
-          calendar.active_calendar[item.id] = true;
-      });
-      Object.keys(calendar.active_calendar).forEach((id) => {
-        if (!calList.items.find((item) => item.id === id))
-          delete calendar.active_calendar[id];
-      });
-      writeData("calendar", calendar);
-    });
+  const auth = await authorize();
+  const calList = (await calendarList(auth)).items;
+  calendarDB.calendar_list = calList;
+  calList.forEach((item) => {
+    if (!(item.id in calendarDB.active_calendar))
+      calendarDB.active_calendar[item.id] = true;
+  });
+  Object.keys(calendarDB.active_calendar).forEach((id) => {
+    if (!calList.find((item) => item.id === id))
+      delete calendarDB.active_calendar[id];
+  });
+  writeData("calendar", calendarDB);
 
   //launch at start
   app.setLoginItemSettings({
