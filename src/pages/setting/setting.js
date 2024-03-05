@@ -12,7 +12,7 @@ function init() {
     .getElementsByClassName("setting-done")[0]
     .addEventListener("click", (_) => {
       IpcRenderer.invoke("use-config-storage", config);
-      IpcRenderer.invoke("use-calendar-storage", calendar);
+      IpcRenderer.invoke("use-calendarInfo-storage", calendar);
     });
   IpcRenderer.invoke("use-config-storage").then((result) => {
     config = result;
@@ -50,7 +50,7 @@ function init() {
       Theme.apply(config.theme, config.opacity);
     };
   });
-  IpcRenderer.invoke("use-calendar-storage").then((result) => {
+  IpcRenderer.invoke("use-calendarInfo-storage").then((result) => {
     calendar = result;
     const p = document.getElementById("account");
     p.innerText = calendar.calendar_list.find((item) => item.primary).id;

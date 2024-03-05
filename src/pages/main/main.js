@@ -28,7 +28,7 @@ function init() {
     if (config.alwaysOnTop) e.target.style.filter = "none";
     else e.target.style.filter = "invert(0.5)";
   });
-  IpcRenderer.on("google-get-calendar-event", (result) => {
+  IpcRenderer.invoke("google-get-calendar-event").then((result) => {
     events = result;
     calRender(0, config.language);
   });

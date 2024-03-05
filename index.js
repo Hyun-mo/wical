@@ -65,7 +65,7 @@ ipcMain.handle("use-calendarInfo-storage", async (_, value) => {
   return readData("calendarInfo");
 });
 
-ipcMain.on("google-get-calendar-event", async (e) => {
+ipcMain.handle("google-get-calendar-event", async (_) => {
   const calendarInfo = readData("calendarInfo") || {};
   if (!("calendar_list" in calendarInfo)) return {};
   const active_calendar = Object.keys(calendarInfo.active_calendar || {});
@@ -74,7 +74,7 @@ ipcMain.on("google-get-calendar-event", async (e) => {
       .filter((key) => calendarInfo.active_calendar[key])
       .map(async (id) => await synchronize(id))
   );
-  e.reply(event_to_hash([].concat(...result)));
+  return event_to_hash([].concat(...result));
 });
 
 ipcMain.handle("google-get-calendar-list", async (_) => {
