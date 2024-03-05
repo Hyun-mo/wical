@@ -56,13 +56,14 @@ async function authorize() {
   if (client) {
     return client;
   }
+  writeData("calendarInfo", null);
+  writeData("calendarDB", null);
   client = await authenticate({
     scopes: SCOPES,
     keyfilePath: CREDENTIALS_PATH,
   });
   if (client.credentials) {
     await saveCredentials(client);
-    writeData("calendar", null);
   }
   return client;
 }
@@ -74,7 +75,8 @@ async function authorize() {
  * @param {Date} end Date type.
  * @returns {calendar_v3.Schema$Event[]}
  */
-async function listEvents(auth, start, end, id = "primary") {
+async function listEvents(start, end, id = "primary") {
+  const auth = authorize();
   const calendar = google.calendar({ version: "v3", auth });
   console.log(id);
   const res = await calendar.events.list({
@@ -95,7 +97,8 @@ async function listEvents(auth, start, end, id = "primary") {
 }
 
 //get calendar id
-async function calendarList(auth) {
+async function calendarList() {
+  const auth = await authorize();
   const calendar = google.calendar({ version: "v3", auth });
   const calendar_list = await calendar.calendarList.list();
   // console.log(calendar_list.data.items);
@@ -109,10 +112,11 @@ async function calendarList(auth) {
  * @param {string} id calendar id.
  * @returns {calendar_v3.Schema$Event[]}
  */
-async function synchronize(auth, id) {
+async function synchronize(id) {
   console.log(id);
+  const auth = await authorize();
   const calendar = google.calendar({ version: "v3", auth });
-  const calendarDB = readData("calendar");
+  const calendarDB = readData("calendarDB") || {};
   if (!(id in calendarDB))
     calendarDB[id] = { event: [], SYNC_TOKEN_KEY: undefined };
   let pageToken;
@@ -154,12 +158,11 @@ async function synchronize(auth, id) {
       } while (pageToken);
     }
   }
-  writeData("calendar", calendarDB);
+  writeData("calendarDB", calendarDB);
   return calendarDB[id].event;
 }
 
 module.exports = {
-  authorize,
   calendarList,
   synchronize,
 };

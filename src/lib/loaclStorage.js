@@ -6,7 +6,7 @@ const dataPath = app.getPath("userData");
 function writeData(key, value) {
   const filePath = path.join(dataPath, key + ".json");
   if (!value) {
-    fs.unlinkSync(filePath);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     return;
   }
   fs.writeFileSync(filePath, JSON.stringify(value));
@@ -28,7 +28,7 @@ function parseData(key) {
       theme: "system",
       fontSize: "normal",
     },
-    calendar: {
+    calendarInfo: {
       calendar_list: {},
       active_calendar: {},
     },

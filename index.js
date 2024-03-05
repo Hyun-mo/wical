@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
-const { authorize, synchronize, calendarList } = require("./src/lib/google");
+const { synchronize, calendarList } = require("./src/lib/google");
 const { readData, writeData } = require("./src/lib/loaclStorage");
 
 const appFolder = path.dirname(process.execPath);
@@ -60,29 +60,25 @@ ipcMain.handle("use-config-storage", async (_, value) => {
   return readData("config");
 });
 
-ipcMain.handle("use-calendar-storage", async (_, value) => {
-  if (value) return writeData("calendar", value);
-  return readData("calendar");
+ipcMain.handle("use-calendarInfo-storage", async (_, value) => {
+  if (value) return writeData("calendarInfo", value);
+  return readData("calendarInfo");
 });
 
-ipcMain.handle("google-get-calendar-event", async (_) => {
-  const auth = await authorize();
-  const calendarDB = readData("calendar");
-  const active_calendar = Object.keys(calendarDB.active_calendar || {});
-  if (!active_calendar) {
-    await init();
-  }
+ipcMain.on("google-get-calendar-event", async (e) => {
+  const calendarInfo = readData("calendarInfo") || {};
+  if (!("calendar_list" in calendarInfo)) return {};
+  const active_calendar = Object.keys(calendarInfo.active_calendar || {});
   const result = await Promise.all(
     active_calendar
-      .filter((key) => calendarDB.active_calendar[key])
-      .map(async (id) => await synchronize(auth, id))
+      .filter((key) => calendarInfo.active_calendar[key])
+      .map(async (id) => await synchronize(id))
   );
-  return event_to_hash([].concat(...result));
+  e.reply(event_to_hash([].concat(...result)));
 });
 
 ipcMain.handle("google-get-calendar-list", async (_) => {
-  const auth = await authorize();
-  const data = await calendarList(auth);
+  const data = await calendarList();
   return data.items;
 });
 
@@ -124,20 +120,20 @@ function event_to_hash(events) {
 }
 
 async function init() {
-  const calendarDB = readData("calendar");
+  const calendarInfo = readData("calendarInfo");
+  const calList = (await calendarList()).items;
   const config = readData("config");
-  const auth = await authorize();
-  const calList = (await calendarList(auth)).items;
-  calendarDB.calendar_list = calList;
+  calendarInfo.calendar_list = calList;
   calList.forEach((item) => {
-    if (!(item.id in calendarDB.active_calendar))
-      calendarDB.active_calendar[item.id] = true;
+    synchronize(item.id);
+    if (!(item.id in calendarInfo.active_calendar))
+      calendarInfo.active_calendar[item.id] = true;
   });
-  Object.keys(calendarDB.active_calendar).forEach((id) => {
+  Object.keys(calendarInfo.active_calendar).forEach((id) => {
     if (!calList.find((item) => item.id === id))
-      delete calendarDB.active_calendar[id];
+      delete calendarInfo.active_calendar[id];
   });
-  writeData("calendar", calendarDB);
+  writeData("calendarInfo", calendarInfo);
 
   //launch at start
   app.setLoginItemSettings({

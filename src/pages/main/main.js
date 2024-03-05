@@ -12,7 +12,6 @@ function init() {
   const app = document.getElementById("app");
   IpcRenderer.invoke("set-window-size", app.offsetHeight);
   let now_month = 0;
-  getGoogleCalendar(new Date());
   const Arrow = document.getElementsByClassName("header")[0];
   Arrow.addEventListener("click", (e) => {
     if (e.target.classList.contains("left")) now_month -= 1;
@@ -29,12 +28,17 @@ function init() {
     if (config.alwaysOnTop) e.target.style.filter = "none";
     else e.target.style.filter = "invert(0.5)";
   });
+  IpcRenderer.on("google-get-calendar-event", (result) => {
+    events = result;
+    calRender(0, config.language);
+  });
 
-  IpcRenderer.invoke("use-calendar-storage").then((result) => {
+  IpcRenderer.invoke("use-calendarInfo-storage").then((result) => {
     calendar = result;
+    console.log(result);
   });
   IpcRenderer.invoke("use-config-storage").then((result) => {
-    config = result;
+    config = result || {};
     calRender(0, config.language);
     Theme.apply(config.theme, config.opacity);
     if (config.alwaysOnTop) {
@@ -75,24 +79,26 @@ function calRender(now_month, lang) {
     }
     el.classList.add("date");
     el.innerText = date.getDate();
-    if (!events) return;
 
     const dot_box = document.createElement("div");
     dot_box.className = "dot-box";
-    const ev = events[Math.round(date.getTime() / ONE_DAY)];
-    if (ev) {
-      const max_account = 3;
-      const accounts = [...new Set(ev.map((e) => e.creator.email))];
-      accounts.slice(0, max_account).forEach((account) => {
-        const color = calendar.calendar_list.find(
-          (e) => e.id === account
-        ).backgroundColor;
-        const dot = document.createElement("span");
-        dot.className = "dot";
-        dot.style.backgroundColor = color;
-        dot_box.appendChild(dot);
-      });
+    if (Object.keys(events)) {
+      const ev = events[Math.round(date.getTime() / ONE_DAY)];
+      if (ev) {
+        const max_account = 3;
+        const accounts = [...new Set(ev.map((e) => e.creator.email))];
+        accounts.slice(0, max_account).forEach((account) => {
+          const color = calendar.calendar_list.find(
+            (e) => e.id === account
+          ).backgroundColor;
+          const dot = document.createElement("span");
+          dot.className = "dot";
+          dot.style.backgroundColor = color;
+          dot_box.appendChild(dot);
+        });
+      }
     }
+
     el.appendChild(dot_box);
     const this_date = date.getTime();
     el.addEventListener("click", (e) => {
@@ -126,28 +132,11 @@ function calRender(now_month, lang) {
 }
 
 /**
- * get events of the year
- * @param{Date} month Date type
- */
-function getGoogleCalendar(month) {
-  const year = month.getFullYear();
-  if (year in events) return;
-  const start = new Date(month.getFullYear() - 1, 0, 1);
-  const end = new Date(month.getFullYear() + 1, 0, 1);
-  IpcRenderer.invoke("google-get-calendar-event", {
-    start: start,
-    end: end,
-  }).then((result) => {
-    events = result;
-    calRender(0, config.language);
-  });
-}
-
-/**
  * show 7days schedules from the date
  * @param {Date} date
  */
 function ShowNextSchedule(date) {
+  if (!events) return;
   const Schedule = document.getElementById("schedule");
   Schedule.innerHTML = "";
   const days = Array.from({ length: 7 }, (_, i) => i);
@@ -204,7 +193,7 @@ function ShowNextSchedule(date) {
   if (event_set.size) Schedule.style.display = "block";
   else Schedule.style.display = "none";
   const app = document.getElementById("app");
-  IpcRenderer.invoke("set-window-size", app.offsetHeight + 5);
+  IpcRenderer.invoke("set-window-size", app.offsetHeight);
 }
 
 init();
